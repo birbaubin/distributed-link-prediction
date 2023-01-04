@@ -4,6 +4,7 @@
 #include "util/data_loader.h"
 #include "util/flags.h"
 #include "util/graph_utils.h"
+#include "tests/test_crypto.h"
 
 using namespace std;
 
@@ -29,9 +30,8 @@ int main(int argc, char const *argv[])
         // cout << "Hello" << endl;
     #endif
 
-    vector<uint16_t> result = common_neighbors(graph, 69, 71);
 
-    print_vector(result);
-    
+    test_hash();
     return 0;
 }
+

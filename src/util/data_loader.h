@@ -12,7 +12,6 @@
 using namespace std;
 
 vector<UndirectedEdge> load_graph(string filename);
-void print_graph(vector<UndirectedEdge> graph);
 
 
 #endif
