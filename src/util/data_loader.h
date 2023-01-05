@@ -11,7 +11,7 @@
 
 using namespace std;
 
-vector<UndirectedEdge> load_graph(string filename);
+UndirectedEdge* load_graph(uint32_t* size,  std::string filename);
 
 
 #endif

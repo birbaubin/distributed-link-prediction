@@ -6,14 +6,13 @@
 #include "typedefs.h"
 
 using namespace std;
-vector<uint16_t> neighbors(vector<UndirectedEdge> graph, uint16_t node);
+vector<uint32_t> neighbors(UndirectedEdge* graph, uint32_t graph_size,  uint32_t node);
 
-vector<uint16_t> common_neighbors(vector<UndirectedEdge> graph, uint16_t node1, uint16_t node2);
+vector<uint32_t> common_neighbors(UndirectedEdge* graph, uint32_t graph_size, uint32_t node1, uint32_t node2);
 
-vector<uint16_t> intersection(vector<uint16_t> vect1, vector<uint16_t> vect2 );
+vector<uint32_t> intersection(vector<uint32_t> vect1, vector<uint32_t> vect2 );
+void print_graph(UndirectedEdge* graph, uint32_t size);
 
-void print_graph(vector<UndirectedEdge> graph);
-
-void print_vector(vector<uint16_t> vect);
+// void print_vector(vector<uint16_t> vect);
 
 #endif
