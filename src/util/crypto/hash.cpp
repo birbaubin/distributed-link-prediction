@@ -21,20 +21,15 @@ void sha256_hash(uint16_t* plaintext, unsigned char* hash)
 }
 
 void sha256_mpz_t(uint16_t* plaintext, mpz_t* hash)
- {
+{
 	unsigned int len = strlen ((const char*) plaintext);
     unsigned char* hash_hex = (unsigned char*) malloc(SHA256_DIGEST_LENGTH * sizeof(char));
-	
 	SHA256((unsigned char*) plaintext, len, hash_hex);
-
     stringstream ss;
-
     for(int i=0; i<SHA256_DIGEST_LENGTH; ++i)
         ss << hex << (int)hash_hex[i];
     string mystr = ss.str();
-
     mpz_set_str(*hash, mystr.c_str(), 16);
-	
 	free(hash_hex);
 
- }
+}

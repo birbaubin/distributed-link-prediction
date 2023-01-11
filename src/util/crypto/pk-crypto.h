@@ -58,9 +58,9 @@ public:
 	virtual void set_inv_1(num** x, num* n, num** w) = 0;
 	virtual int isnegative(num* x)=0;
 	virtual void mod(num* x) = 0;
-	virtual void export_to_bytes(uint32_t* buf, uint32_t field_size) = 0;
-	virtual void import_from_bytes(uint32_t* buf, uint32_t field_size) = 0;
-	// virtual void print() = 0;
+	virtual void export_to_bytes(uint8_t* buf, uint32_t field_size) = 0;
+	virtual void import_from_bytes(uint8_t* buf, uint32_t field_size) = 0;
+	virtual void print() = 0;
 };
 
 
@@ -75,10 +75,11 @@ public:
         virtual void set_pow_var(fe* b, num* e) = 0;
 	virtual void set_div(fe* a, fe* b) = 0;
 	virtual void set_double_pow_mul(fe* b1, num* e1, fe* b2, num* e2) = 0;
-	virtual void export_to_bytes(uint32_t* buf) = 0;
+	virtual void export_to_bytes(uint8_t* buf) = 0;
+	virtual void import_from_bytes(uint8_t* buf) = 0;
 	virtual void import_from_bytes(uint32_t* buf) = 0;
-	virtual void sample_fe_from_bytes(uint32_t* buf, uint32_t bytelen) = 0;
-	// virtual void print() = 0;
+	virtual void sample_fe_from_bytes(uint8_t* buf, uint32_t bytelen) = 0;
+	virtual void print() = 0;
 
 protected:
 	virtual void init() = 0;

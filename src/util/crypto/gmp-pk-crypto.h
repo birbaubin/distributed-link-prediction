@@ -10,9 +10,6 @@
 
 #include "pk-crypto.h"
 #include <gmp.h>
-#include <iostream>
-
-using namespace std;
 
 class prime_field;
 class gmp_fe;
@@ -73,10 +70,11 @@ public:
         void set_pow_var(fe* b, num* e);
 	void set_div(fe* a, fe* b);
 	void set_double_pow_mul(fe* b1, num* e1, fe* b2, num* e2);
-	void export_to_bytes(uint32_t* buf);
+	void export_to_bytes(uint8_t* buf);
+	void import_from_bytes(uint8_t* buf);
 	void import_from_bytes(uint32_t* buf);
-	void sample_fe_from_bytes(uint32_t* buf, uint32_t bytelen);
-	// void print() {cout << val << endl;};
+	void sample_fe_from_bytes(uint8_t* buf, uint32_t bytelen);
+	void print() {/*cout << val << endl;*/};
 
 private:
 	void init() {mpz_init(val); };
@@ -103,10 +101,10 @@ public:
 
 	mpz_t* get_val();
 
-	void export_to_bytes(uint32_t* buf, uint32_t field_size);
-	void import_from_bytes(uint32_t* buf, uint32_t field_size);
+	void export_to_bytes(uint8_t* buf, uint32_t field_size);
+	void import_from_bytes(uint8_t* buf, uint32_t field_size);
 	void set_rnd(uint32_t bits);
-	// void print() {cout << val << endl;};
+	void print() {/*cout << val << endl;*/};
 private:
 	mpz_t val;
 	prime_field* field;
@@ -129,6 +127,6 @@ private:
 
 
 // mpz_export does not fill leading zeros, thus a prepending of leading 0s is required
-void mpz_export_padded(uint32_t* pBufIdx, uint32_t field_size, mpz_t to_export);
+void mpz_export_padded(uint8_t* pBufIdx, uint32_t field_size, mpz_t to_export);
 
 #endif /* GMP_PK_CRYPTO_H_ */

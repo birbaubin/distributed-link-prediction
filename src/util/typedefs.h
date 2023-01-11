@@ -18,6 +18,11 @@ static double getMillies(timeval timestart, timeval timeend)
 	return (double)(time2-time1)/1000;
 }
 
+typedef struct connection{
+    int port;
+    char* addr;
+} connection;
+
 typedef struct securitylevel
 {
 	uint32_t statbits;

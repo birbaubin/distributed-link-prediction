@@ -30,10 +30,6 @@ const char* ifcg3072 =
 const char* ifcq3072 =
 		"95729504467608377623766753562217147614989054519467474668915026082895293552781";
 
-
-using namespace std; 
-
-
 gmp_num::gmp_num(prime_field* fld) {
 	field = fld;
 	mpz_init(val);
@@ -87,12 +83,12 @@ void gmp_num::mod(num* x){
 }  
 
 
-void gmp_num::import_from_bytes(uint32_t* buf, uint32_t field_size) {
+void gmp_num::import_from_bytes(uint8_t* buf, uint32_t field_size) {
 	mpz_import(val, field_size, 1, sizeof((buf)[0]), 0, 0, (buf));
 }
 
 //export and pad all leading zeros
-void gmp_num::export_to_bytes(uint32_t* buf, uint32_t field_size) {
+void gmp_num::export_to_bytes(uint8_t* buf, uint32_t field_size) {
 	mpz_export_padded(buf, ceil_divide(field_size, 8), val);
 }
 
@@ -163,16 +159,20 @@ void gmp_fe::set_double_pow_mul(fe* b1, num* e1, fe* b2, num* e2) {
 	set_mul(&tmpa, &tmpb); //val = b1^e1 * b2^e2
 }
 
+void gmp_fe::import_from_bytes(uint8_t* buf) {
+	mpz_import(val, field->fe_byte_size(), 1, sizeof((buf)[0]), 0, 0, (buf));
+}
+
 void gmp_fe::import_from_bytes(uint32_t* buf) {
 	mpz_import(val, field->fe_byte_size(), 1, sizeof((buf)[0]), 0, 0, (buf));
 }
+
 //export and pad all leading zeros
-void gmp_fe::export_to_bytes(uint32_t* buf) {
-	size_t words = 1;
-	mpz_export(buf, &words, 1, 4, 0, 0, val);
+void gmp_fe::export_to_bytes(uint8_t* buf) {
+	mpz_export_padded(buf, field->fe_byte_size(), val);
 }
 
-void gmp_fe::sample_fe_from_bytes(uint32_t* buf, uint32_t bytelen) {
+void gmp_fe::sample_fe_from_bytes(uint8_t* buf, uint32_t bytelen) {
 	mpz_import(val, bytelen, 1, sizeof((buf)[0]), 0, 0, (buf));
 	mpz_mod(val, val, *field->get_p());
 }
@@ -314,7 +314,7 @@ void gmp_brickexp::pow(fe* result, num* e) {
 
 
 // mpz_export does not fill leading zeros, thus a prepending of leading 0s is required
-void mpz_export_padded(uint32_t* pBufIdx, uint32_t field_size_bytes, mpz_t to_export) {
+void mpz_export_padded(uint8_t* pBufIdx, uint32_t field_size_bytes, mpz_t to_export) {
 	size_t size = 0;
 	mpz_export(pBufIdx, &size, 1, sizeof(pBufIdx[0]), 0, 0, to_export);
 
