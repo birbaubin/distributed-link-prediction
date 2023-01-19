@@ -1,5 +1,5 @@
-#ifndef PROTOCOL_H
-#define PROTOCOL_H
+#ifndef NEW_PROTOCOL_H
+#define NEW_PROTOCOL_H
 
 #include <time.h>
 #include "../util/typedefs.h"
@@ -15,7 +15,7 @@
 
 uint32_t run_party_1(crypto* crypt_env, uint32_t ntasks, uint32_t* matches, field_type ftype);
 uint32_t run_party_2(crypto* crypt_env, uint32_t ntasks, uint32_t* matches, field_type ftype);
-void run_inline_protocol();
+void run_inline_new_protocol();
 
 
 #endif

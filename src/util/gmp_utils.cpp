@@ -50,6 +50,8 @@ void mpz_intersection(mpz_t first_array[], int length_first_array,
        if(mpz_contains(second_array, length_second_array, first_array[i]))
        {
             mpz_init_set(result_array[size], first_array[i]);
+            // mpz_out_str(stdout, 10, result_array[size]);
+
             size++;
        }
     }

@@ -33,8 +33,8 @@ UndirectedEdge* load_graph(uint32_t* size,  std::string filename)
 		std::getline(str, source, ',');
 		std::getline(str, target, ',');
 		
-		local_graph[i].vertices[0] = stoi(source);
-		local_graph[i].vertices[1] = stoi(target);
+		local_graph[i].vertices[0] = stoul(source);
+		local_graph[i].vertices[1] = stoul(target);
 
 		i++;
 
