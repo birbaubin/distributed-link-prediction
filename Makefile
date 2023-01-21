@@ -1,7 +1,7 @@
 HELPERS_SRC=src/util/*.cpp
 CRYPTO_SRC=src/util/crypto/*.cpp
 TESTS_SRC=src/tests/*.cpp
-NEW_PROTOCOL_SRC=src/baseline_dist_link_prediction/inline_private_protocol.cpp
+NEW_PROTOCOL_SRC=src/baseline_dist_link_prediction/inline_private_protocol_corrected.cpp
 OBJ=*.o
 OPENSSL_FLAGS=-I/opt/homebrew/Cellar/openssl@3/3.0.7/include -L/opt/homebrew/Cellar/openssl@3/3.0.7/lib -lssl -lcrypto
 GMP_FLAGS= -lgmp

@@ -16,7 +16,7 @@
 
 void run_baseline_protocol_inline();
 // void run_clear_protocol();
-uint32_t psi_ca(vector<uint32_t> set1, vector<uint32_t> set2, pk_crypto* field);
+uint32_t psi_ca(vector<uint32_t> set1, vector<uint32_t> set2, prime_field* field);
 
 
 #endif

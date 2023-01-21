@@ -26,6 +26,7 @@ public:
 
 	num* get_num();
 	num* get_rnd_num(uint32_t bitlen=0);
+	num* get_rnd_num2(uint32_t bitlen=0);
 	num* get_rnd_num_1();
 	fe* get_fe();
 	fe* get_rnd_fe(uint32_t bitlen);
@@ -74,7 +75,7 @@ public:
 	void import_from_bytes(uint8_t* buf);
 	void import_from_bytes(uint32_t* buf);
 	void sample_fe_from_bytes(uint8_t* buf, uint32_t bytelen);
-	void print() {/*cout << val << endl;*/};
+	void print() {mpz_out_str(stdout, 10, val);};
 
 private:
 	void init() {mpz_init(val); };

@@ -101,6 +101,18 @@ num* prime_field::get_rnd_num(uint32_t bitlen) {
 	return new gmp_num(this, val);
 }
 
+num* prime_field::get_rnd_num2(uint32_t bitlen) {
+	mpz_t val;
+	if(bitlen == 0)
+		bitlen = secparam.ifcbits;
+	mpz_init(val);
+	mpz_t p_1;
+	mpz_init(p_1);
+	mpz_sub_ui(p_1, p, 1);
+	mpz_urandomm(val, rnd_state, p_1); //sample_rnd_mpz_t(val, bits, fp);
+	return new gmp_num(this, val);
+}
+
 num* prime_field::get_rnd_num_1() {
 //falta implementar
 }
@@ -309,8 +321,6 @@ void gmp_brickexp::pow(fe* result, num* e) {
 	  }
    }
 }
-
-
 
 
 // mpz_export does not fill leading zeros, thus a prepending of leading 0s is required
