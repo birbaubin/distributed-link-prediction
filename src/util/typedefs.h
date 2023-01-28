@@ -10,14 +10,6 @@ typedef struct UndirectedEdge
     
 } UndirectedEdge;
 
-static double getMillies(timeval timestart, timeval timeend)
-{
-	long time1 = (timestart.tv_sec * 1000000) + (timestart.tv_usec );
-	long time2 = (timeend.tv_sec * 1000000) + (timeend.tv_usec );
-
-	return (double)(time2-time1)/1000;
-}
-
 typedef struct connection{
     int port;
     char* addr;

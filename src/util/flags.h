@@ -1,5 +1,5 @@
 #include <sys/time.h>
 
-
-#define DEBUG
+#define DEBUG_DATA
+#define DEBUG_TIME
 // #define DEBUG_TIME_READ_GRAPH

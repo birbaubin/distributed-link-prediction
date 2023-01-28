@@ -27,10 +27,10 @@ def add_false_edges(graph, proportion):
 
 
 
-DATASET_NAME="../../datasets/email-enron-only.csv"
+DATASET_NAME="flickrEdges.txt"
 
 
-dataset = pd.read_csv("datasets/"+DATASET_NAME, header=0, sep=',')
+dataset = pd.read_csv("../../datasets/"+DATASET_NAME, header=0, sep=',')
 q1 = 0.006
 q2 = 0.3
 q3 = 0.504
@@ -40,5 +40,10 @@ dataset["p"] = np.random.random(dataset.shape[0])
 network1 = dataset[((dataset["p"]>q1) & (dataset["p"]<q2)) | (dataset["p"] > q3)]
 network2 = dataset[dataset["p"]>q2]
 
+network1.to_csv("../../datasets/" + "net1-" + DATASET_NAME, header=False, index=False, columns=["Source" ,"Target"])
+network2.to_csv("../../datasets/" + "net2-" + DATASET_NAME, header=False, index=False, columns=["Source" ,"Target"])
+
+
 nodes_list = set(dataset["Source"]).union(set(dataset["Target"]))
 attack_network1 = add_false_edges(network1, 1)
+attack_network1.to_csv("../../datasets/" + "attack-net-" + DATASET_NAME , header=False, index=False, columns=["Source" ,"Target"])

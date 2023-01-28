@@ -16,7 +16,6 @@ bool mpz_contains(mpz_t array[], int array_length, mpz_t element)
     
 }
 
-
 void mpz_union(mpz_t first_array[], int length_first_array,  
                 mpz_t second_array[], int length_second_array,  
                 mpz_t result_array[], int* length_result_array)
@@ -27,11 +26,11 @@ void mpz_union(mpz_t first_array[], int length_first_array,
        mpz_init_set(result_array[i], first_array[i]);
     }
 
-    for (size_t i = 0; i < length_second_array ; i++)
+    for (size_t j = 0; j < length_second_array ; j++)
     {
-        if(!mpz_contains(result_array, size, second_array[i]))
+        if(!mpz_contains(result_array, *length_result_array, second_array[j]))
         {
-            mpz_init_set(result_array[size], second_array[i]);
+            mpz_init_set(result_array[size], second_array[j]);
             size++;
         }
     }
