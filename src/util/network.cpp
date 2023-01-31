@@ -42,27 +42,27 @@ int network::send_mpz(mpz_t **neighbors, int number_of_arrays, int* lengths_of_a
 {
 
     std::cout << "network.cpp : Sending data" << std::endl;
-
+    std::string tmp;
 
     boost::archive::binary_oarchive oarch( stream, boost::archive::no_header );
 
     for (size_t i = 0; i < number_of_arrays; i++)
     {
-        oarch << lengths_of_arrays[i] << ",";
+        tmp = tmp + std::to_string(lengths_of_arrays[i]) + ",";
     }
 
-    stream << "|";
+    tmp = tmp + "|";
     
-    std::string tmp;
     for (size_t i = 0; i < number_of_arrays; i++)
     {
         for (size_t j = 0; j < lengths_of_arrays[i]; j++)
         {
-            tmp =  mpz_get_str(NULL, 10, neighbors[i][j]);
-            oarch << tmp << ",";
+            tmp = tmp + mpz_get_str(NULL, 20, neighbors[i][j]) + ",";  
         }
         
     }
+
+    std::cout << tmp << std::endl;
     
     return 1;
 
@@ -72,18 +72,18 @@ int network::send_mpz(mpz_t **neighbors, int number_of_arrays, int* lengths_of_a
 
 int network::receive_elements(int* lengths_of_arrays, mpz_t** data)
 {
-    char buff[50000];
+    std::string buff;
     std::string current_item;
     std::string str_lengths;
     std::string str_data;
     std::string current_length;
-    int int_lengths[4];
+    int int_lengths[4] = {0};
     boost::archive::binary_iarchive iarch( stream, boost::archive::no_header );
+
     // stream >> buff;
     iarch >> buff;
 
-
-    // std::cout << buff << std::endl;
+	std::cout << "You can reach here" << std::endl;
 
     std::stringstream str(buff);
 

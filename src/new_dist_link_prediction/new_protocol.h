@@ -14,8 +14,8 @@
 
 
 
-uint32_t run_party_1(vector<uint32_t>x_neighbors_node1, vector<uint32_t> y_neighbors_node1);
-uint32_t run_party_2(vector<uint32_t>x_neighbors_node1, vector<uint32_t> y_neighbors_node1);
+uint32_t run_party_x(vector<uint32_t>x_neighbors_node1, vector<uint32_t> x_neighbors_node2, pk_crypto* field);
+uint32_t run_party_y(vector<uint32_t>y_neighbors_node1, vector<uint32_t> y_neighbors_node2, pk_crypto* field);
 void run_new_protocol_inline(uint32_t node1, uint32_t node2, pk_crypto* field, 
                             vector<uint32_t> x_neighbors_node1, vector<uint32_t> x_neighbors_node2,
                             vector<uint32_t> y_neighbors_node1, vector<uint32_t> y_neighbors_node2);

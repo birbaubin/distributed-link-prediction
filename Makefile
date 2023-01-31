@@ -11,11 +11,15 @@ STDFLAG=-std=c++17
 
 
 
-all: helpers crypto tests new_protocol baseline_protocol main
+all: helpers crypto tests new_protocol baseline_protocol inline
 	g++ ${OBJ} -o output ${OPENSSL_FLAGS} ${GMP_FLAGS} ${BOOST_FLAGS} ${STDFLAG}
 
-main: 
+inline: 
 	g++ -c src/main.cpp ${OPENSSL_FLAGS} ${GMP_FLAGS} ${BOOST_FLAGS} ${STDFLAG}
+
+multiprocess:
+	g++ -c src/multiparty_main.cpp ${OPENSSL_FLAGS} ${GMP_FLAGS} ${BOOST_FLAGS} ${STDFLAG}
+
 
 new_protocol:
 	g++ -c ${NEW_PROTOCOL_SRC} ${OPENSSL_FLAGS} ${GMP_FLAGS} ${BOOST_FLAGS} ${STDFLAG}

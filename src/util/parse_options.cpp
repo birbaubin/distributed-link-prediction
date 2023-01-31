@@ -1,7 +1,3 @@
-/**
- \file 		parse_options.cpp
- \author 	michael.zohner@ec-spride.de
- */
 
 #include "parse_options.h"
 
