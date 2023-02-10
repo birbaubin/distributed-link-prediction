@@ -6,19 +6,21 @@ using namespace std;
 bool mpz_contains(mpz_t array[], int array_length, mpz_t element)
 {
     bool found = false;
+   
     for (size_t i = 0; i < array_length; i++)
     {
         if(mpz_cmp(array[i], element) == 0)
             found = true; 
+
     }
 
     return found;
     
 }
 
-void mpz_union(mpz_t first_array[], int length_first_array,  
-                mpz_t second_array[], int length_second_array,  
-                mpz_t result_array[], int* length_result_array)
+void mpz_union(mpz_t *first_array, int length_first_array,  
+                mpz_t *second_array, int length_second_array,  
+                mpz_t *result_array, int* length_result_array)
 {
     int size = length_first_array;
     for (size_t i = 0; i < length_first_array; i++)
@@ -28,8 +30,10 @@ void mpz_union(mpz_t first_array[], int length_first_array,
 
     for (size_t j = 0; j < length_second_array ; j++)
     {
+        // cout << "DEBUg before if" << endl;
         if(!mpz_contains(result_array, *length_result_array, second_array[j]))
         {
+            // cout << "DEBUg in if" << endl;
             mpz_init_set(result_array[size], second_array[j]);
             size++;
         }

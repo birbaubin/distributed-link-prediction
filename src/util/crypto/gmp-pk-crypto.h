@@ -27,7 +27,6 @@ public:
 	num* get_num();
 	num* get_rnd_num(uint32_t bitlen=0);
 	num* get_rnd_num2(uint32_t bitlen=0);
-	num* get_rnd_num_1();
 	fe* get_fe();
 	fe* get_rnd_fe(uint32_t bitlen);
 	fe* get_generator();

@@ -18,7 +18,7 @@ uint32_t run_party_x(vector<uint32_t>x_neighbors_node1, vector<uint32_t> x_neigh
 	conn.addr = "127.0.0.1";
 	conn.port = 7777;
 
-	network network("client", conn);
+	network network(0, conn);
 
 	int size_x_neighbors_node1 = x_neighbors_node1.size();
     int size_x_neighbors_node2 = x_neighbors_node2.size();
@@ -49,6 +49,8 @@ uint32_t run_party_x(vector<uint32_t>x_neighbors_node1, vector<uint32_t> x_neigh
 	int lengths[2] = {size_x_neighbors_node1, size_x_neighbors_node2};
 
 	network.send_mpz(encrypted_elements, 2, lengths);
+
+    return 0;
 	
 
 }

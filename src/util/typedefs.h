@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 #include <vector>
+#include <string>
 
 typedef struct UndirectedEdge
 {
@@ -12,7 +13,7 @@ typedef struct UndirectedEdge
 
 typedef struct connection{
     int port;
-    char* addr;
+    std::string addr;
 } connection;
 
 typedef struct securitylevel

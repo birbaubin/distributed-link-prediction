@@ -77,33 +77,33 @@ public:
 	void gen_rnd_perm(uint32_t* perm, uint32_t neles);
 
 	//Encryption routines
-	void encrypt(uint8_t* resbuf, uint8_t* inbuf, uint32_t ninbytes);
-	void decrypt(uint8_t* resbuf, uint8_t* inbuf, uint32_t ninbytes);
+	// void encrypt(uint8_t* resbuf, uint8_t* inbuf, uint32_t ninbytes);
+	// void decrypt(uint8_t* resbuf, uint8_t* inbuf, uint32_t ninbytes);
 
-	//double routines
-	void hash(uint8_t* resbuf, uint32_t noutbytes, uint8_t* inbuf, uint32_t ninbytes);
-	void hash(uint8_t* resbuf, uint32_t noutbytes, uint8_t* inbuf, uint32_t ninbytes, uint8_t* tmpbuf);
-	void hash_double(uint8_t* resbuf, uint32_t noutbytes, uint8_t* inbuf1, uint8_t* inbuf2, uint32_t ninbytes1, uint32_t ninbytes2, uint8_t* tmpbuf);
-	void hash_mult(uint8_t* resbuf, uint32_t noutbytes, uint8_t* inbuf1, uint8_t* inbuf2, uint8_t* inbuf3, uint32_t ninbytes, uint8_t* tmpbuf);
-	void hash_ctr(uint8_t* resbuf, uint32_t noutbytes, uint8_t* inbuf, uint32_t ninbytes, uint64_t ctr);
-	void fixed_key_aes_hash(AES_KEY_CTX* aes_key, uint8_t* resbuf, uint32_t noutbytes, uint8_t* inbuf, uint32_t ninbytes);
-	void fixed_key_aes_hash_ctr(uint8_t* resbuf, uint32_t noutbytes, uint8_t* inbuf, uint32_t ninbytes);
+	// //double routines
+	// void hash(uint8_t* resbuf, uint32_t noutbytes, uint8_t* inbuf, uint32_t ninbytes);
+	// void hash(uint8_t* resbuf, uint32_t noutbytes, uint8_t* inbuf, uint32_t ninbytes, uint8_t* tmpbuf);
+	// void hash_double(uint8_t* resbuf, uint32_t noutbytes, uint8_t* inbuf1, uint8_t* inbuf2, uint32_t ninbytes1, uint32_t ninbytes2, uint8_t* tmpbuf);
+	// void hash_mult(uint8_t* resbuf, uint32_t noutbytes, uint8_t* inbuf1, uint8_t* inbuf2, uint8_t* inbuf3, uint32_t ninbytes, uint8_t* tmpbuf);
+	// void hash_ctr(uint8_t* resbuf, uint32_t noutbytes, uint8_t* inbuf, uint32_t ninbytes, uint64_t ctr);
+	// void fixed_key_aes_hash(AES_KEY_CTX* aes_key, uint8_t* resbuf, uint32_t noutbytes, uint8_t* inbuf, uint32_t ninbytes);
+	// void fixed_key_aes_hash_ctr(uint8_t* resbuf, uint32_t noutbytes, uint8_t* inbuf, uint32_t ninbytes);
 
-	void aes_cbc_hash(AES_KEY_CTX* aes_key, uint8_t* resbuf, uint8_t* inbuf, uint32_t ninbytes);
-	void aes_compression_hash(AES_KEY_CTX* aes_key, uint8_t* resbuf, uint8_t* inbuf, uint32_t ninbytes);
+	// void aes_cbc_hash(AES_KEY_CTX* aes_key, uint8_t* resbuf, uint8_t* inbuf, uint32_t ninbytes);
+	// void aes_compression_hash(AES_KEY_CTX* aes_key, uint8_t* resbuf, uint8_t* inbuf, uint32_t ninbytes);
 
 
 	//Key seed routines
-	void seed_aes_hash(uint8_t* seed, bc_mode mode=ECB, const uint8_t* iv=ZERO_IV);
-	void seed_aes_enc(uint8_t* seed, bc_mode mode=ECB, const uint8_t* iv=ZERO_IV);
+	// void seed_aes_hash(uint8_t* seed, bc_mode mode=ECB, const uint8_t* iv=ZERO_IV);
+	// void seed_aes_enc(uint8_t* seed, bc_mode mode=ECB, const uint8_t* iv=ZERO_IV);
 
 	//External encryption routines
-	void init_aes_key(AES_KEY_CTX* aes_key, uint8_t* seed, bc_mode mode=ECB, const uint8_t* iv=ZERO_IV);
-	void init_aes_key(AES_KEY_CTX* aes_key, uint32_t symbits, uint8_t* seed, bc_mode mode=ECB, const uint8_t* iv=ZERO_IV);
-	void clean_aes_key(AES_KEY_CTX* aeskey);
-	uint32_t get_aes_key_bytes();
-	void encrypt(AES_KEY_CTX* enc_key, uint8_t* resbuf, uint8_t* inbuf, uint32_t ninbytes);
-	void decrypt(AES_KEY_CTX* dec_key, uint8_t* resbuf, uint8_t* inbuf, uint32_t ninbytes);
+	// void init_aes_key(AES_KEY_CTX* aes_key, uint8_t* seed, bc_mode mode=ECB, const uint8_t* iv=ZERO_IV);
+	// void init_aes_key(AES_KEY_CTX* aes_key, uint32_t symbits, uint8_t* seed, bc_mode mode=ECB, const uint8_t* iv=ZERO_IV);
+	// void clean_aes_key(AES_KEY_CTX* aeskey);
+	// uint32_t get_aes_key_bytes();
+	// void encrypt(AES_KEY_CTX* enc_key, uint8_t* resbuf, uint8_t* inbuf, uint32_t ninbytes);
+	// void decrypt(AES_KEY_CTX* dec_key, uint8_t* resbuf, uint8_t* inbuf, uint32_t ninbytes);
 
 	pk_crypto* gen_field(field_type ftype);
 
@@ -117,7 +117,7 @@ private:
 	void seed_aes_key(AES_KEY_CTX* aeskey, uint8_t* seed, bc_mode mode=ECB, const uint8_t* iv=ZERO_IV, bool encrypt=true);
 	void seed_aes_key(AES_KEY_CTX* aeskey, uint32_t symseclvl, uint8_t* seed, bc_mode mode=ECB, const uint8_t* iv=ZERO_IV, bool encrypt=true);
 	void init(uint32_t symsecbits, uint8_t* seed);
-	void free_prf_state(prf_state_ctx* prf_state);
+	// void free_prf_state(prf_state_ctx* prf_state);
 
 	AES_KEY_CTX aes_hash_key;
 	AES_KEY_CTX aes_enc_key;
@@ -142,13 +142,14 @@ private:
 
 
 //Some functions that should be useable without the class
-void sha1_hash(uint8_t* resbuf, uint32_t noutbytes, uint8_t* inbuf, uint32_t ninbytes, uint8_t* hash_buf);
-void sha256_hash(uint8_t* resbuf, uint32_t noutbytes, uint8_t* inbuf, uint32_t ninbytes, uint8_t* hash_buf);
-void sha256_hash_double(uint8_t* resbuf, uint32_t noutbytes, uint8_t* inbuf1, uint8_t* inbuf2, uint32_t ninbytes1, uint32_t ninbytes2, uint8_t* hash_buf);
-void sha256_hash_mult(uint8_t* resbuf, uint32_t noutbytes, uint8_t* inbuf1, uint8_t* inbuf2, uint8_t* inbuf3, uint32_t ninbytes, uint8_t* hash_buf);
-void sha512_hash(uint8_t* resbuf, uint32_t noutbytes, uint8_t* inbuf, uint32_t ninbytes, uint8_t* hash_buf);
-void gen_secure_random(uint8_t* dest, uint32_t nbytes);
-void gen_rnd_bytes(prf_state_ctx* prf_state, uint8_t* resbuf, uint32_t nbytes);
+// void sha1_hash(uint8_t* resbuf, uint32_t noutbytes, uint8_t* inbuf, uint32_t ninbytes, uint8_t* hash_buf);
+// void sha256_hash(uint8_t* resbuf, uint32_t noutbytes, uint8_t* inbuf, uint32_t ninbytes, uint8_t* hash_buf);
+// void sha256_hash_double(uint8_t* resbuf, uint32_t noutbytes, uint8_t* inbuf1, uint8_t* inbuf2, uint32_t ninbytes1, uint32_t ninbytes2, uint8_t* hash_buf);
+// void sha256_hash_mult(uint8_t* resbuf, uint32_t noutbytes, uint8_t* inbuf1, uint8_t* inbuf2, uint8_t* inbuf3, uint32_t ninbytes, uint8_t* hash_buf);
+// void sha512_hash(uint8_t* resbuf, uint32_t noutbytes, uint8_t* inbuf, uint32_t ninbytes, uint8_t* hash_buf);
+// void gen_secure_random(uint8_t* dest, uint32_t nbytes);
+// void gen_rnd_bytes(prf_state_ctx* prf_state, uint8_t* resbuf, uint32_t nbytes);
+
 #ifdef AES256_HASH
 void gen_rnd_bytes_pipelined(prf_state_ctx* prf_state, uint8_t* resbuf, uint32_t nbytes);
 #endif

@@ -113,9 +113,6 @@ num* prime_field::get_rnd_num2(uint32_t bitlen) {
 	return new gmp_num(this, val);
 }
 
-num* prime_field::get_rnd_num_1() {
-//falta implementar
-}
 
 fe* prime_field::get_rnd_fe(uint32_t bitlen) {
 	mpz_t val;

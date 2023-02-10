@@ -21,5 +21,10 @@ vector<uint32_t> remove_vector(vector<uint32_t> vect1, vector<uint32_t> vect2 );
 
 void print_vector(vector<uint32_t> vect);
 
+vector<uint32_t> select_random_node(vector<UndirectedEdge> graph, int number_of_nodes);
+
+bool edge_exists(vector<UndirectedEdge> graph, UndirectedEdge edge);
+
+vector<UndirectedEdge> generate_complete_graph(vector<uint32_t> nodes);
 
 #endif

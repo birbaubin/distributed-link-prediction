@@ -22,67 +22,68 @@ crypto::crypto(uint32_t symsecbits) {
 }
 
 crypto::~crypto() {
-	free_prf_state(&global_prf_state);
-	free(aes_hash_in_buf);
-	free(aes_hash_out_buf);
-	free(sha_hash_buf);
-	free(aes_hash_buf_y1);
-	free(aes_hash_buf_y2);
+	// free_prf_state(&global_prf_state);
+	// free(aes_hash_in_buf);
+	// free(aes_hash_out_buf);
+	// free(sha_hash_buf);
+	// free(aes_hash_buf_y1);
+	// free(aes_hash_buf_y2);
 
 #ifdef OPENSSL_OPAQUE_EVP_CIPHER_CTX
-	clean_aes_key(&aes_hash_key);
-	clean_aes_key(&aes_enc_key);
-	clean_aes_key(&aes_dec_key);
+	// clean_aes_key(&aes_hash_key);
+	// clean_aes_key(&aes_enc_key);
+	// clean_aes_key(&aes_dec_key);
 #endif
 }
 
 void crypto::init(uint32_t symsecbits, uint8_t* seed) {
 	secparam = get_sec_lvl(symsecbits);
 
-#ifdef OPENSSL_OPAQUE_EVP_CIPHER_CTX
-	aes_hash_key = EVP_CIPHER_CTX_new();
-	aes_enc_key = EVP_CIPHER_CTX_new();
-	aes_dec_key = EVP_CIPHER_CTX_new();
-#endif
+// #ifdef OPENSSL_OPAQUE_EVP_CIPHER_CTX
+// 	aes_hash_key = EVP_CIPHER_CTX_new();
+// 	aes_enc_key = EVP_CIPHER_CTX_new();
+// 	aes_dec_key = EVP_CIPHER_CTX_new();
+// #endif
 
 	init_prf_state(&global_prf_state, seed);
 
-	aes_hash_in_buf = (uint8_t*) malloc(AES_BYTES);
-	aes_hash_out_buf = (uint8_t*) malloc(AES_BYTES);
-	aes_hash_buf_y1 = (uint8_t*) malloc(AES_BYTES);
-	aes_hash_buf_y2 = (uint8_t*) malloc(AES_BYTES);
+	// aes_hash_in_buf = (uint8_t*) malloc(AES_BYTES);
+	// aes_hash_out_buf = (uint8_t*) malloc(AES_BYTES);
+	// aes_hash_buf_y1 = (uint8_t*) malloc(AES_BYTES);
+	// aes_hash_buf_y2 = (uint8_t*) malloc(AES_BYTES);
 
-	if (secparam.symbits == ST.symbits) {
-		hash_routine = &sha1_hash;
-		sha_hash_buf = (uint8_t*) malloc(SHA1_OUT_BYTES);
-	} else if (secparam.symbits == MT.symbits) {
-		hash_routine = &sha256_hash;
-		hash_routine_double = &sha256_hash_double;
-		hash_routine_mult = &sha256_hash_mult;
-		sha_hash_buf = (uint8_t*) malloc(SHA256_OUT_BYTES);
-	} else if (secparam.symbits == LT.symbits) {
-		hash_routine = &sha256_hash;
-		hash_routine_double = &sha256_hash_double;
-		hash_routine_mult = &sha256_hash_mult;
-		sha_hash_buf = (uint8_t*) malloc(SHA256_OUT_BYTES);
-	} else if (secparam.symbits == XLT.symbits) {
-		hash_routine = &sha512_hash;
-		sha_hash_buf = (uint8_t*) malloc(SHA512_OUT_BYTES);
-	} else if (secparam.symbits == XXLT.symbits) {
-		hash_routine = &sha512_hash;
-		sha_hash_buf = (uint8_t*) malloc(SHA512_OUT_BYTES);
-	} else {
-		hash_routine = &sha256_hash;
-		hash_routine_double = &sha256_hash_double;
-		hash_routine_mult = &sha256_hash_mult;
-		sha_hash_buf = (uint8_t*) malloc(SHA256_OUT_BYTES);
-	}
+	// if (secparam.symbits == ST.symbits) {
+	// 	hash_routine = &sha1_hash;
+	// 	sha_hash_buf = (uint8_t*) malloc(SHA1_OUT_BYTES);
+	// } else if (secparam.symbits == MT.symbits) {
+	// 	hash_routine = &sha256_hash;
+	// 	hash_routine_double = &sha256_hash_double;
+	// 	hash_routine_mult = &sha256_hash_mult;
+	// 	sha_hash_buf = (uint8_t*) malloc(SHA256_OUT_BYTES);
+	// } else if (secparam.symbits == LT.symbits) {
+	// 	hash_routine = &sha256_hash;
+	// 	hash_routine_double = &sha256_hash_double;
+	// 	hash_routine_mult = &sha256_hash_mult;
+	// 	sha_hash_buf = (uint8_t*) malloc(SHA256_OUT_BYTES);
+	// } else if (secparam.symbits == XLT.symbits) {
+	// 	hash_routine = &sha512_hash;
+	// 	sha_hash_buf = (uint8_t*) malloc(SHA512_OUT_BYTES);
+	// } else if (secparam.symbits == XXLT.symbits) {
+	// 	hash_routine = &sha512_hash;
+	// 	sha_hash_buf = (uint8_t*) malloc(SHA512_OUT_BYTES);
+	// } else {
+	// 	hash_routine = &sha256_hash;
+	// 	hash_routine_double = &sha256_hash_double;
+	// 	hash_routine_mult = &sha256_hash_mult;
+	// 	sha_hash_buf = (uint8_t*) malloc(SHA256_OUT_BYTES);
+	// }
 }
 
 pk_crypto* crypto::gen_field(field_type ftype) {
 	uint8_t* pkseed = (uint8_t*) malloc(sizeof(uint8_t) * (secparam.symbits >> 3));
 	gen_rnd(pkseed, secparam.symbits>>3);
-	if(ftype == P_FIELD) return new prime_field(secparam, pkseed);
+	// if(ftype == P_FIELD) 
+	return new prime_field(secparam, pkseed);
 	// else return new ecc_field(secparam, pkseed);
 }
 
@@ -154,62 +155,62 @@ void crypto::gen_rnd_uniform(uint8_t* res, uint64_t mod) {
 	free(rndbuf);
 }
 
-void crypto::encrypt(AES_KEY_CTX* enc_key, uint8_t* resbuf, uint8_t* inbuf, uint32_t ninbytes) {
-	int32_t dummy;
-#ifdef OPENSSL_OPAQUE_EVP_CIPHER_CTX
-	EVP_EncryptUpdate(*enc_key, resbuf, &dummy, inbuf, ninbytes);
-	EVP_EncryptFinal_ex(*enc_key, resbuf, &dummy);
-#else
-	EVP_EncryptUpdate(enc_key, resbuf, &dummy, inbuf, ninbytes);
-	EVP_EncryptFinal_ex(enc_key, resbuf, &dummy);
-#endif
-}
-void crypto::decrypt(AES_KEY_CTX* dec_key, uint8_t* resbuf, uint8_t* inbuf, uint32_t ninbytes) {
-	int32_t dummy;
-	//cout << "inbuf = " << (hex) << ((uint64_t*) inbuf)[0] << ((uint64_t*) inbuf)[1] << (dec) << endl;
-#ifdef OPENSSL_OPAQUE_EVP_CIPHER_CTX
-	EVP_DecryptUpdate(*dec_key, resbuf, &dummy, inbuf, ninbytes);
-	EVP_DecryptFinal_ex(*dec_key, resbuf, &dummy);
-#else
-	EVP_DecryptUpdate(dec_key, resbuf, &dummy, inbuf, ninbytes);
-	EVP_DecryptFinal_ex(dec_key, resbuf, &dummy);
-#endif
-	//cout << "outbuf = " << (hex) << ((uint64_t*) resbuf)[0] << ((uint64_t*) resbuf)[1] << (dec) << " (" << dummy << ")" << endl;
-}
+// void crypto::encrypt(AES_KEY_CTX* enc_key, uint8_t* resbuf, uint8_t* inbuf, uint32_t ninbytes) {
+// 	int32_t dummy;
+// #ifdef OPENSSL_OPAQUE_EVP_CIPHER_CTX
+// 	EVP_EncryptUpdate(*enc_key, resbuf, &dummy, inbuf, ninbytes);
+// 	EVP_EncryptFinal_ex(*enc_key, resbuf, &dummy);
+// #else
+// 	EVP_EncryptUpdate(enc_key, resbuf, &dummy, inbuf, ninbytes);
+// 	EVP_EncryptFinal_ex(enc_key, resbuf, &dummy);
+// #endif
+// }
+// void crypto::decrypt(AES_KEY_CTX* dec_key, uint8_t* resbuf, uint8_t* inbuf, uint32_t ninbytes) {
+// 	int32_t dummy;
+// 	//cout << "inbuf = " << (hex) << ((uint64_t*) inbuf)[0] << ((uint64_t*) inbuf)[1] << (dec) << endl;
+// #ifdef OPENSSL_OPAQUE_EVP_CIPHER_CTX
+// 	EVP_DecryptUpdate(*dec_key, resbuf, &dummy, inbuf, ninbytes);
+// 	EVP_DecryptFinal_ex(*dec_key, resbuf, &dummy);
+// #else
+// 	EVP_DecryptUpdate(dec_key, resbuf, &dummy, inbuf, ninbytes);
+// 	EVP_DecryptFinal_ex(dec_key, resbuf, &dummy);
+// #endif
+// 	//cout << "outbuf = " << (hex) << ((uint64_t*) resbuf)[0] << ((uint64_t*) resbuf)[1] << (dec) << " (" << dummy << ")" << endl;
+// }
 
-void crypto::encrypt(uint8_t* resbuf, uint8_t* inbuf, uint32_t ninbytes) {
-	encrypt(&aes_enc_key, resbuf, inbuf, ninbytes);
-}
+// void crypto::encrypt(uint8_t* resbuf, uint8_t* inbuf, uint32_t ninbytes) {
+// 	encrypt(&aes_enc_key, resbuf, inbuf, ninbytes);
+// }
 
 
-void crypto::decrypt(uint8_t* resbuf, uint8_t* inbuf, uint32_t ninbytes) {
-	decrypt(&aes_dec_key, resbuf, inbuf, ninbytes);
-}
+// void crypto::decrypt(uint8_t* resbuf, uint8_t* inbuf, uint32_t ninbytes) {
+// 	decrypt(&aes_dec_key, resbuf, inbuf, ninbytes);
+// }
 
-void crypto::seed_aes_hash(uint8_t* seed, bc_mode mode, const uint8_t* iv) {
-	seed_aes_key(&aes_hash_key, seed, mode, iv);
-}
+// void crypto::seed_aes_hash(uint8_t* seed, bc_mode mode, const uint8_t* iv) {
+// 	seed_aes_key(&aes_hash_key, seed, mode, iv);
+// }
 
-void crypto::seed_aes_enc(uint8_t* seed, bc_mode mode, const uint8_t* iv) {
-	seed_aes_key(&aes_enc_key, seed, mode, iv, true);
-	seed_aes_key(&aes_dec_key, seed, mode, iv, false);
-}
+// void crypto::seed_aes_enc(uint8_t* seed, bc_mode mode, const uint8_t* iv) {
+// 	seed_aes_key(&aes_enc_key, seed, mode, iv, true);
+// 	seed_aes_key(&aes_dec_key, seed, mode, iv, false);
+// }
 
-void crypto::init_aes_key(AES_KEY_CTX* aes_key, uint8_t* seed, bc_mode mode, const uint8_t* iv) {
-	seed_aes_key(aes_key, seed, mode, iv);
-}
+// void crypto::init_aes_key(AES_KEY_CTX* aes_key, uint8_t* seed, bc_mode mode, const uint8_t* iv) {
+// 	seed_aes_key(aes_key, seed, mode, iv);
+// }
 
-void crypto::init_aes_key(AES_KEY_CTX* aes_key, uint32_t symbits, uint8_t* seed, bc_mode mode, const uint8_t* iv) {
-	seed_aes_key(aes_key, symbits, seed, mode, iv);
-}
+// void crypto::init_aes_key(AES_KEY_CTX* aes_key, uint32_t symbits, uint8_t* seed, bc_mode mode, const uint8_t* iv) {
+// 	seed_aes_key(aes_key, symbits, seed, mode, iv);
+// }
 
-void crypto::clean_aes_key(AES_KEY_CTX* aeskey) {
-#ifdef OPENSSL_OPAQUE_EVP_CIPHER_CTX
-	EVP_CIPHER_CTX_free(*aeskey);
-#else
-	EVP_CIPHER_CTX_cleanup(aeskey);
-#endif
-}
+// void crypto::clean_aes_key(AES_KEY_CTX* aeskey) {
+// #ifdef OPENSSL_OPAQUE_EVP_CIPHER_CTX
+// 	EVP_CIPHER_CTX_free(*aeskey);
+// #else
+// 	EVP_CIPHER_CTX_cleanup(aeskey);
+// #endif
+// }
 
 void crypto::seed_aes_key(AES_KEY_CTX* aeskey, uint8_t* seed, bc_mode mode, const uint8_t* iv, bool encrypt) {
 	seed_aes_key(aeskey, secparam.symbits, seed, mode, iv, encrypt);
@@ -257,72 +258,72 @@ void crypto::seed_aes_key(AES_KEY_CTX* aeskey, uint32_t symbits, uint8_t* seed, 
 	}
 }
 
-void crypto::hash_ctr(uint8_t* resbuf, uint32_t noutbytes, uint8_t* inbuf, uint32_t ninbytes, uint64_t ctr) {
-	uint8_t* tmpbuf = (uint8_t*) malloc(ninbytes + sizeof(uint64_t));
-	memcpy(tmpbuf, &ctr, sizeof(uint64_t));
-	memcpy(tmpbuf + sizeof(uint64_t), inbuf, ninbytes);
-	hash_routine(resbuf, noutbytes, tmpbuf, ninbytes+sizeof(uint64_t), sha_hash_buf);
-	free(tmpbuf);
-}
+// void crypto::hash_ctr(uint8_t* resbuf, uint32_t noutbytes, uint8_t* inbuf, uint32_t ninbytes, uint64_t ctr) {
+// 	uint8_t* tmpbuf = (uint8_t*) malloc(ninbytes + sizeof(uint64_t));
+// 	memcpy(tmpbuf, &ctr, sizeof(uint64_t));
+// 	memcpy(tmpbuf + sizeof(uint64_t), inbuf, ninbytes);
+// 	hash_routine(resbuf, noutbytes, tmpbuf, ninbytes+sizeof(uint64_t), sha_hash_buf);
+// 	free(tmpbuf);
+// }
 
-void crypto::hash(uint8_t* resbuf, uint32_t noutbytes, uint8_t* inbuf, uint32_t ninbytes) {
-	hash_routine(resbuf, noutbytes, inbuf, ninbytes, sha_hash_buf);
-}
+// void crypto::hash(uint8_t* resbuf, uint32_t noutbytes, uint8_t* inbuf, uint32_t ninbytes) {
+// 	hash_routine(resbuf, noutbytes, inbuf, ninbytes, sha_hash_buf);
+// }
 
-void crypto::hash(uint8_t* resbuf, uint32_t noutbytes, uint8_t* inbuf, uint32_t ninbytes, uint8_t* tmpbuf) {
-	hash_routine(resbuf, noutbytes, inbuf, ninbytes, tmpbuf);
-}
+// void crypto::hash(uint8_t* resbuf, uint32_t noutbytes, uint8_t* inbuf, uint32_t ninbytes, uint8_t* tmpbuf) {
+// 	hash_routine(resbuf, noutbytes, inbuf, ninbytes, tmpbuf);
+// }
 
-void crypto::hash_double(uint8_t* resbuf, uint32_t noutbytes, uint8_t* inbuf1, uint8_t* inbuf2, uint32_t ninbytes1, uint32_t ninbytes2, uint8_t* tmpbuf) {
-	hash_routine_double(resbuf, noutbytes, inbuf1, inbuf2, ninbytes1, ninbytes2, tmpbuf);
-}
+// void crypto::hash_double(uint8_t* resbuf, uint32_t noutbytes, uint8_t* inbuf1, uint8_t* inbuf2, uint32_t ninbytes1, uint32_t ninbytes2, uint8_t* tmpbuf) {
+// 	hash_routine_double(resbuf, noutbytes, inbuf1, inbuf2, ninbytes1, ninbytes2, tmpbuf);
+// }
 
-void crypto::hash_mult(uint8_t* resbuf, uint32_t noutbytes, uint8_t* inbuf1, uint8_t* inbuf2, uint8_t* inbuf3, uint32_t ninbytes, uint8_t* tmpbuf) {
-	hash_routine_mult(resbuf, noutbytes, inbuf1, inbuf2, inbuf3, ninbytes, tmpbuf);
-}
+// void crypto::hash_mult(uint8_t* resbuf, uint32_t noutbytes, uint8_t* inbuf1, uint8_t* inbuf2, uint8_t* inbuf3, uint32_t ninbytes, uint8_t* tmpbuf) {
+// 	hash_routine_mult(resbuf, noutbytes, inbuf1, inbuf2, inbuf3, ninbytes, tmpbuf);
+// }
 
 //A fixed-key hashing scheme that uses AES, should not be used for real hashing, hashes to AES_BYTES bytes
-void crypto::fixed_key_aes_hash(AES_KEY_CTX* aes_key, uint8_t* resbuf, uint32_t noutbytes, uint8_t* inbuf, uint32_t ninbytes) {
-	uint32_t i;
-	int32_t dummy;
+// void crypto::fixed_key_aes_hash(AES_KEY_CTX* aes_key, uint8_t* resbuf, uint32_t noutbytes, uint8_t* inbuf, uint32_t ninbytes) {
+// 	uint32_t i;
+// 	int32_t dummy;
 
-	//assert(aes_hash_key != NULL);
+// 	//assert(aes_hash_key != NULL);
 
-	memset(aes_hash_in_buf, 0, AES_BYTES);
-	memcpy(aes_hash_in_buf, inbuf, ninbytes);
+// 	memset(aes_hash_in_buf, 0, AES_BYTES);
+// 	memcpy(aes_hash_in_buf, inbuf, ninbytes);
 
-	//two encryption iterations TODO: not secure since both blocks are treated independently, implement DM or MMO
-#ifdef OPENSSL_OPAQUE_EVP_CIPHER_CTX
-	EVP_EncryptUpdate(*aes_key, aes_hash_out_buf, &dummy, aes_hash_in_buf, AES_BYTES);
-#else
-	EVP_EncryptUpdate(aes_key, aes_hash_out_buf, &dummy, aes_hash_in_buf, AES_BYTES);
-#endif
-	((uint64_t*) aes_hash_out_buf)[0] ^= ((uint64_t*) aes_hash_in_buf)[0];
-	((uint64_t*) aes_hash_out_buf)[1] ^= ((uint64_t*) aes_hash_in_buf)[1];
+// 	//two encryption iterations TODO: not secure since both blocks are treated independently, implement DM or MMO
+// #ifdef OPENSSL_OPAQUE_EVP_CIPHER_CTX
+// 	EVP_EncryptUpdate(*aes_key, aes_hash_out_buf, &dummy, aes_hash_in_buf, AES_BYTES);
+// #else
+// 	EVP_EncryptUpdate(aes_key, aes_hash_out_buf, &dummy, aes_hash_in_buf, AES_BYTES);
+// #endif
+// 	((uint64_t*) aes_hash_out_buf)[0] ^= ((uint64_t*) aes_hash_in_buf)[0];
+// 	((uint64_t*) aes_hash_out_buf)[1] ^= ((uint64_t*) aes_hash_in_buf)[1];
 
-	memcpy(resbuf, aes_hash_out_buf, noutbytes);
-}
+// 	memcpy(resbuf, aes_hash_out_buf, noutbytes);
+// }
 
 //An aes hashing scheme that takes as input a counter and an aes-key-struct, should not be used for real hashing
-void crypto::aes_cbc_hash(AES_KEY_CTX* aes_key, uint8_t* resbuf, uint8_t* inbuf, uint32_t ninbytes) {
-	uint32_t i;
-	int32_t dummy;
+// void crypto::aes_cbc_hash(AES_KEY_CTX* aes_key, uint8_t* resbuf, uint8_t* inbuf, uint32_t ninbytes) {
+// 	uint32_t i;
+// 	int32_t dummy;
 
-#ifdef OPENSSL_OPAQUE_EVP_CIPHER_CTX
-	EVP_EncryptUpdate(*aes_key, resbuf, &dummy, inbuf, ninbytes);
-#else
-	EVP_EncryptUpdate(aes_key, resbuf, &dummy, inbuf, ninbytes);
-#endif
+// #ifdef OPENSSL_OPAQUE_EVP_CIPHER_CTX
+// 	EVP_EncryptUpdate(*aes_key, resbuf, &dummy, inbuf, ninbytes);
+// #else
+// 	EVP_EncryptUpdate(aes_key, resbuf, &dummy, inbuf, ninbytes);
+// #endif
 
-	//TODO: optimized for faster PSI, input is always size of 32-bytes
-	for(i = 0; i < ninbytes/AES_BYTES; i++) {
-		((uint64_t*) resbuf)[0] ^= ((uint64_t*) inbuf)[2*i];
-		((uint64_t*) resbuf)[1] ^= ((uint64_t*) inbuf)[2*i+1];
-	}
-	//for(i = 0; i < ninbytes; i++) {
-	//	resbuf[i] ^= inbuf[i];
-	//}
-}
+// 	//TODO: optimized for faster PSI, input is always size of 32-bytes
+// 	for(i = 0; i < ninbytes/AES_BYTES; i++) {
+// 		((uint64_t*) resbuf)[0] ^= ((uint64_t*) inbuf)[2*i];
+// 		((uint64_t*) resbuf)[1] ^= ((uint64_t*) inbuf)[2*i+1];
+// 	}
+// 	//for(i = 0; i < ninbytes; i++) {
+// 	//	resbuf[i] ^= inbuf[i];
+// 	//}
+// }
 
 //Generate a random permutation of neles elements using Knuths algorithm
 // void crypto::gen_rnd_perm(uint32_t* perm, uint32_t neles) {
@@ -341,23 +342,23 @@ void crypto::aes_cbc_hash(AES_KEY_CTX* aes_key, uint8_t* resbuf, uint8_t* inbuf,
 // 	free(rndbuf);
 // }
 
-uint32_t crypto::get_aes_key_bytes() {
-	if(secparam.symbits == ST.symbits) return 16;
-	else if(secparam.symbits == MT.symbits) return 16;
-	else if(secparam.symbits == LT.symbits) return 16;
-	else if(secparam.symbits == XLT.symbits) return 24;
-	else if(secparam.symbits == XXLT.symbits) return 32;
-	else return 64;
-}
+// uint32_t crypto::get_aes_key_bytes() {
+// 	if(secparam.symbits == ST.symbits) return 16;
+// 	else if(secparam.symbits == MT.symbits) return 16;
+// 	else if(secparam.symbits == LT.symbits) return 16;
+// 	else if(secparam.symbits == XLT.symbits) return 24;
+// 	else if(secparam.symbits == XXLT.symbits) return 32;
+// 	else return 64;
+// }
 
-uint32_t crypto::get_hash_bytes() {
-	if(secparam.symbits == ST.symbits) return 20;
-	else if(secparam.symbits == MT.symbits) return 32;
-	else if(secparam.symbits == LT.symbits) return 32;
-	else if(secparam.symbits == XLT.symbits) return 64;
-	else if(secparam.symbits == XXLT.symbits) return 64;
-	else return 64;
-}
+// uint32_t crypto::get_hash_bytes() {
+// 	if(secparam.symbits == ST.symbits) return 20;
+// 	else if(secparam.symbits == MT.symbits) return 32;
+// 	else if(secparam.symbits == LT.symbits) return 32;
+// 	else if(secparam.symbits == XLT.symbits) return 64;
+// 	else if(secparam.symbits == XXLT.symbits) return 64;
+// 	else return 64;
+// }
 
 //Generate a common seed, is only secure in the semi-honest model
 // void crypto::gen_common_seed(prf_state_ctx* prf_state, CSocket& sock) {
@@ -392,96 +393,96 @@ void crypto::init_prf_state(prf_state_ctx* prf_state, uint8_t* seed) {
 	prf_state->ctr = (uint64_t*) calloc(ceil_divide(secparam.symbits, 8*sizeof(uint64_t)), sizeof(uint64_t));
 }
 
-void crypto::free_prf_state(prf_state_ctx* prf_state) {
-	free(prf_state->ctr);
-	clean_aes_key(&(prf_state->aes_key));
-}
+// void crypto::free_prf_state(prf_state_ctx* prf_state) {
+// 	free(prf_state->ctr);
+// 	clean_aes_key(&(prf_state->aes_key));
+// }
 
-void sha1_hash(uint8_t* resbuf, uint32_t noutbytes, uint8_t* inbuf, uint32_t ninbytes, uint8_t* hash_buf) {
-	SHA_CTX sha;
-	SHA1_Init(&sha);
-	SHA1_Update(&sha, inbuf, ninbytes);
-	SHA1_Final(hash_buf, &sha);
+// void sha1_hash(uint8_t* resbuf, uint32_t noutbytes, uint8_t* inbuf, uint32_t ninbytes, uint8_t* hash_buf) {
+// 	SHA_CTX sha;
+// 	SHA1_Init(&sha);
+// 	SHA1_Update(&sha, inbuf, ninbytes);
+// 	SHA1_Final(hash_buf, &sha);
 
-//	cout << "SHA1" <<endl;
+// //	cout << "SHA1" <<endl;
 
-#ifdef PRINT_HASHES
-	cout << "SHA1 hashes: " << '\n';
-	for (unsigned int i = 0; i<noutbytes; i++)
-		printf("%02x", hash_buf[i]);
-	cout << "\n";
-#endif
+// #ifdef PRINT_HASHES
+// 	cout << "SHA1 hashes: " << '\n';
+// 	for (unsigned int i = 0; i<noutbytes; i++)
+// 		printf("%02x", hash_buf[i]);
+// 	cout << "\n";
+// #endif
 
-	memcpy(resbuf, hash_buf, noutbytes);
-}
+// 	memcpy(resbuf, hash_buf, noutbytes);
+// }
 
-// Now we are using this
-void sha256_hash(uint8_t* resbuf, uint32_t noutbytes, uint8_t* inbuf, uint32_t ninbytes, uint8_t* hash_buf) {
-//	cout << "noutbytes: " << noutbytes << "\n" << "ninbytes:" << ninbytes << "\n";
-	SHA256_CTX sha;
-	SHA256_Init(&sha);
-	SHA256_Update(&sha, inbuf, ninbytes);
-	SHA256_Final(hash_buf, &sha);
-//	cout << "SHA256" <<endl;
+// // Now we are using this
+// void sha256_hash(uint8_t* resbuf, uint32_t noutbytes, uint8_t* inbuf, uint32_t ninbytes, uint8_t* hash_buf) {
+// //	cout << "noutbytes: " << noutbytes << "\n" << "ninbytes:" << ninbytes << "\n";
+// 	SHA256_CTX sha;
+// 	SHA256_Init(&sha);
+// 	SHA256_Update(&sha, inbuf, ninbytes);
+// 	SHA256_Final(hash_buf, &sha);
+// //	cout << "SHA256" <<endl;
 
-#ifdef PRINT_HASHES
-	cout << "SHA256 hashes: " << '\n';
-	for (unsigned int i = 0; i<noutbytes; i++)
-		printf("%02x", hash_buf[i]);
-	cout << "\n";
-#endif
-	memcpy(resbuf, hash_buf, noutbytes);
-}
+// #ifdef PRINT_HASHES
+// 	cout << "SHA256 hashes: " << '\n';
+// 	for (unsigned int i = 0; i<noutbytes; i++)
+// 		printf("%02x", hash_buf[i]);
+// 	cout << "\n";
+// #endif
+// 	memcpy(resbuf, hash_buf, noutbytes);
+// }
 
-void sha256_hash_double(uint8_t* resbuf, uint32_t noutbytes, uint8_t* inbuf1, uint8_t* inbuf2, uint32_t ninbytes1, uint32_t ninbytes2, uint8_t* hash_buf) {
-	SHA256_CTX sha;
-	SHA256_Init(&sha);
-	SHA256_Update(&sha, inbuf1, ninbytes1);
-	SHA256_Update(&sha, inbuf2, ninbytes2);
-	SHA256_Final(hash_buf, &sha);
+// void sha256_hash_double(uint8_t* resbuf, uint32_t noutbytes, uint8_t* inbuf1, uint8_t* inbuf2, uint32_t ninbytes1, uint32_t ninbytes2, uint8_t* hash_buf) {
+// 	SHA256_CTX sha;
+// 	SHA256_Init(&sha);
+// 	SHA256_Update(&sha, inbuf1, ninbytes1);
+// 	SHA256_Update(&sha, inbuf2, ninbytes2);
+// 	SHA256_Final(hash_buf, &sha);
 
-#ifdef PRINT_HASHES
-	cout << "SHA256 hashes for 3 elements: " << '\n';
-	for (unsigned int i = 0; i<noutbytes; i++)
-		printf("%02x", hash_buf[i]);
-	cout << "\n";
-#endif
-	memcpy(resbuf, hash_buf, noutbytes);
-}
+// #ifdef PRINT_HASHES
+// 	cout << "SHA256 hashes for 3 elements: " << '\n';
+// 	for (unsigned int i = 0; i<noutbytes; i++)
+// 		printf("%02x", hash_buf[i]);
+// 	cout << "\n";
+// #endif
+// 	memcpy(resbuf, hash_buf, noutbytes);
+// }
 
-void sha256_hash_mult(uint8_t* resbuf, uint32_t noutbytes, uint8_t* inbuf1, uint8_t* inbuf2, uint8_t* inbuf3, uint32_t ninbytes, uint8_t* hash_buf) {
-	SHA256_CTX sha;
-	SHA256_Init(&sha);
-	SHA256_Update(&sha, inbuf1, ninbytes);
-	SHA256_Update(&sha, inbuf2, ninbytes);
-	SHA256_Update(&sha, inbuf3, ninbytes);
-	SHA256_Final(hash_buf, &sha);
+// void sha256_hash_mult(uint8_t* resbuf, uint32_t noutbytes, uint8_t* inbuf1, uint8_t* inbuf2, uint8_t* inbuf3, uint32_t ninbytes, uint8_t* hash_buf) {
+// 	SHA256_CTX sha;
+// 	SHA256_Init(&sha);
+// 	SHA256_Update(&sha, inbuf1, ninbytes);
+// 	SHA256_Update(&sha, inbuf2, ninbytes);
+// 	SHA256_Update(&sha, inbuf3, ninbytes);
+// 	SHA256_Final(hash_buf, &sha);
 
-#ifdef PRINT_HASHES
-	cout << "SHA256 hashes for 3 elements: " << '\n';
-	for (unsigned int i = 0; i<noutbytes; i++)
-		printf("%02x", hash_buf[i]);
-	cout << "\n";
-#endif
-	memcpy(resbuf, hash_buf, noutbytes);
-}
+// #ifdef PRINT_HASHES
+// 	cout << "SHA256 hashes for 3 elements: " << '\n';
+// 	for (unsigned int i = 0; i<noutbytes; i++)
+// 		printf("%02x", hash_buf[i]);
+// 	cout << "\n";
+// #endif
+// 	memcpy(resbuf, hash_buf, noutbytes);
+// }
 
-void sha512_hash(uint8_t* resbuf, uint32_t noutbytes, uint8_t* inbuf, uint32_t ninbytes, uint8_t* hash_buf) {
-	SHA512_CTX sha;
-	SHA512_Init(&sha);
-	SHA512_Update(&sha, inbuf, ninbytes);
-	SHA512_Final(hash_buf, &sha);
-//	cout << "SHA512" <<endl;
+// void sha512_hash(uint8_t* resbuf, uint32_t noutbytes, uint8_t* inbuf, uint32_t ninbytes, uint8_t* hash_buf) {
+// 	SHA512_CTX sha;
+// 	SHA512_Init(&sha);
+// 	SHA512_Update(&sha, inbuf, ninbytes);
+// 	SHA512_Final(hash_buf, &sha);
+// //	cout << "SHA512" <<endl;
 
-#ifdef PRINT_HASHES
-	cout << "SHA512 hashes: " << '\n';
-	for (unsigned int i = 0; i<noutbytes; i++)
-		printf("%02x", hash_buf[i]);
-	cout << "\n";
-#endif
+// #ifdef PRINT_HASHES
+// 	cout << "SHA512 hashes: " << '\n';
+// 	for (unsigned int i = 0; i<noutbytes; i++)
+// 		printf("%02x", hash_buf[i]);
+// 	cout << "\n";
+// #endif
 
-	memcpy(resbuf, hash_buf, noutbytes);
-}
+// 	memcpy(resbuf, hash_buf, noutbytes);
+// }
 
 //Read random bytes from /dev/random - copied from stackoverflow (post by zneak)
 // void gen_secure_random(uint8_t* dest, uint32_t nbytes) {
@@ -507,45 +508,45 @@ seclvl get_sec_lvl(uint32_t symsecbits) {
 	else return LT;
 }
 
-void crypto::aes_compression_hash(AES_KEY_CTX* aes_key, uint8_t* resbuf, uint8_t* inbuf, uint32_t ninbytes) {
-	int32_t dummy;
+// void crypto::aes_compression_hash(AES_KEY_CTX* aes_key, uint8_t* resbuf, uint8_t* inbuf, uint32_t ninbytes) {
+// 	int32_t dummy;
 
-	((uint64_t*) aes_hash_in_buf)[0] = ((uint64_t*) inbuf)[0] ^ ((uint64_t*) inbuf)[2];
-	((uint64_t*) aes_hash_in_buf)[1] = ((uint64_t*) inbuf)[1] ^ ((uint64_t*) inbuf)[3];
+// 	((uint64_t*) aes_hash_in_buf)[0] = ((uint64_t*) inbuf)[0] ^ ((uint64_t*) inbuf)[2];
+// 	((uint64_t*) aes_hash_in_buf)[1] = ((uint64_t*) inbuf)[1] ^ ((uint64_t*) inbuf)[3];
 
-#ifdef OPENSSL_OPAQUE_EVP_CIPHER_CTX
-	EVP_EncryptUpdate(*aes_key, aes_hash_buf_y1, &dummy, aes_hash_in_buf, AES_BYTES);
-#else
-	EVP_EncryptUpdate(aes_key, aes_hash_buf_y1, &dummy, aes_hash_in_buf, AES_BYTES);
-#endif
+// #ifdef OPENSSL_OPAQUE_EVP_CIPHER_CTX
+// 	EVP_EncryptUpdate(*aes_key, aes_hash_buf_y1, &dummy, aes_hash_in_buf, AES_BYTES);
+// #else
+// 	EVP_EncryptUpdate(aes_key, aes_hash_buf_y1, &dummy, aes_hash_in_buf, AES_BYTES);
+// #endif
 
-	//cout << (hex) << ((uint64_t*) aes_hash_buf_y1)[0] << ((uint64_t*) aes_hash_buf_y1)[1] << (dec) << endl;
+// 	//cout << (hex) << ((uint64_t*) aes_hash_buf_y1)[0] << ((uint64_t*) aes_hash_buf_y1)[1] << (dec) << endl;
 
-	((uint64_t*) aes_hash_in_buf)[0] = ((uint64_t*) inbuf)[0] ^ ((uint64_t*) inbuf)[2] ^ ((uint64_t*) aes_hash_buf_y1)[0];
-	((uint64_t*) aes_hash_in_buf)[1] = ((uint64_t*) inbuf)[1] ^ ((uint64_t*) inbuf)[3] ^ ((uint64_t*) aes_hash_buf_y1)[1];
+// 	((uint64_t*) aes_hash_in_buf)[0] = ((uint64_t*) inbuf)[0] ^ ((uint64_t*) inbuf)[2] ^ ((uint64_t*) aes_hash_buf_y1)[0];
+// 	((uint64_t*) aes_hash_in_buf)[1] = ((uint64_t*) inbuf)[1] ^ ((uint64_t*) inbuf)[3] ^ ((uint64_t*) aes_hash_buf_y1)[1];
 
-#ifdef OPENSSL_OPAQUE_EVP_CIPHER_CTX
-		EVP_EncryptUpdate(*aes_key, aes_hash_buf_y2, &dummy, aes_hash_in_buf, AES_BYTES);
-#else
-		EVP_EncryptUpdate(aes_key, aes_hash_buf_y2, &dummy, aes_hash_in_buf, AES_BYTES);
-#endif
+// #ifdef OPENSSL_OPAQUE_EVP_CIPHER_CTX
+// 		EVP_EncryptUpdate(*aes_key, aes_hash_buf_y2, &dummy, aes_hash_in_buf, AES_BYTES);
+// #else
+// 		EVP_EncryptUpdate(aes_key, aes_hash_buf_y2, &dummy, aes_hash_in_buf, AES_BYTES);
+// #endif
 
-	//cout << (hex) << ((uint64_t*) aes_hash_buf_y2)[0] << ((uint64_t*) aes_hash_buf_y2)[1] << (dec) << endl;
+// 	//cout << (hex) << ((uint64_t*) aes_hash_buf_y2)[0] << ((uint64_t*) aes_hash_buf_y2)[1] << (dec) << endl;
 
-	((uint64_t*) aes_hash_in_buf)[0] = ((uint64_t*) inbuf)[0] ^ ((uint64_t*) inbuf)[2] ^ ((uint64_t*) aes_hash_buf_y2)[0];
-	((uint64_t*) aes_hash_in_buf)[1] = ((uint64_t*) inbuf)[1] ^ ((uint64_t*) inbuf)[3] ^ ((uint64_t*) aes_hash_buf_y2)[1];
+// 	((uint64_t*) aes_hash_in_buf)[0] = ((uint64_t*) inbuf)[0] ^ ((uint64_t*) inbuf)[2] ^ ((uint64_t*) aes_hash_buf_y2)[0];
+// 	((uint64_t*) aes_hash_in_buf)[1] = ((uint64_t*) inbuf)[1] ^ ((uint64_t*) inbuf)[3] ^ ((uint64_t*) aes_hash_buf_y2)[1];
 
-#ifdef OPENSSL_OPAQUE_EVP_CIPHER_CTX
-	EVP_EncryptUpdate(*aes_key, resbuf, &dummy, aes_hash_in_buf, AES_BYTES);
-#else
-	EVP_EncryptUpdate(aes_key, resbuf, &dummy, aes_hash_in_buf, AES_BYTES);
-#endif
+// #ifdef OPENSSL_OPAQUE_EVP_CIPHER_CTX
+// 	EVP_EncryptUpdate(*aes_key, resbuf, &dummy, aes_hash_in_buf, AES_BYTES);
+// #else
+// 	EVP_EncryptUpdate(aes_key, resbuf, &dummy, aes_hash_in_buf, AES_BYTES);
+// #endif
 
-	//cout << (hex) << ((uint64_t*) resbuf)[0] << ((uint64_t*) resbuf)[1] << (dec) << endl;
+// 	//cout << (hex) << ((uint64_t*) resbuf)[0] << ((uint64_t*) resbuf)[1] << (dec) << endl;
 
-	((uint64_t*) resbuf)[0] = ((uint64_t*) inbuf)[0] ^ ((uint64_t*) aes_hash_buf_y1)[0] ^ ((uint64_t*) aes_hash_buf_y2)[0] ^ ((uint64_t*) resbuf)[0];
-	((uint64_t*) resbuf)[1] = ((uint64_t*) inbuf)[1] ^ ((uint64_t*) aes_hash_buf_y1)[1] ^ ((uint64_t*) aes_hash_buf_y2)[1] ^ ((uint64_t*) resbuf)[1];
-}
+// 	((uint64_t*) resbuf)[0] = ((uint64_t*) inbuf)[0] ^ ((uint64_t*) aes_hash_buf_y1)[0] ^ ((uint64_t*) aes_hash_buf_y2)[0] ^ ((uint64_t*) resbuf)[0];
+// 	((uint64_t*) resbuf)[1] = ((uint64_t*) inbuf)[1] ^ ((uint64_t*) aes_hash_buf_y1)[1] ^ ((uint64_t*) aes_hash_buf_y2)[1] ^ ((uint64_t*) resbuf)[1];
+// }
 
 
 

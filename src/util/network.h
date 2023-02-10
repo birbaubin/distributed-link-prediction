@@ -24,13 +24,13 @@ class network
 private:
     /* data */
 public:
-    char* role;
+    int role;
     connection con;
     tcp::iostream stream;
 
     int send_mpz(mpz_t **neighbors, int number_of_arrays, int* lengths_of_arrays);
     int receive_elements(int* lengths_of_arrays, mpz_t** data);
-    network(char* role, connection con);
+    network(int role, connection con);
     ~network();
 };
 

@@ -26,9 +26,15 @@ static double getMBsFromMpz(uint32_t length)
     return (double)length * sizeof(mpz_t) /(1024*1024);
 }
 
-static double getKBsFromMpz(uint32_t length)
+static double getKBsFromMpz(mpz_t* array, int length)
 {
-    return (double)length * sizeof(mpz_t) /(1024);
+    char oneChar;
+    double size = 0;
+    for (size_t i = 0; i < length; i++)
+    {
+        size+= mpz_sizeinbase (array[i], 16);
+    }
+    return size/1024;
 }
 
 #endif

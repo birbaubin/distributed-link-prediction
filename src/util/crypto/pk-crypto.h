@@ -22,7 +22,6 @@ public:
 	virtual num* get_num() = 0;
 	virtual num* get_rnd_num(uint32_t bitlen=0) = 0;
 	virtual num* get_rnd_num2(uint32_t bitlen=0) = 0;
-	virtual num* get_rnd_num_1() = 0;
 	virtual fe* get_fe() = 0;
 	virtual fe* get_rnd_fe(uint32_t bitlen) = 0;
 	virtual fe* get_generator() = 0;

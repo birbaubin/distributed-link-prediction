@@ -9,9 +9,9 @@
 
 
 
-void sha256_hash(uint16_t* plaintext, unsigned char* hash);
+// void sha256_hash(uint16_t* plaintext, unsigned char* hash);
 
-void sha256_mpz_t(uint16_t* plaintext, mpz_t* hash);
+// void sha256_mpz_t(uint16_t* plaintext, mpz_t* hash);
 
 
 #endif

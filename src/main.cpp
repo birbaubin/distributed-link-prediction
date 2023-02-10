@@ -7,44 +7,61 @@ int main(int argc, char** argv)
 {
 
         const int symsecbits = 80;
+        const int number_of_selected_nodes = 2;
+
         crypto crypto(symsecbits);
 	pk_crypto* field = crypto.gen_field((field_type)0);
 
-        string dataset_name = "flickrEdges.txt";
+        string dataset_name = "email.csv";
 
-       
-        string network1_name = "datasets/net1-"+dataset_name; 
+        timeval t_start, t_end;
+
+
+        string network1_name = "datasets/"+dataset_name; 
         string network2_name = "datasets/net2-"+dataset_name; 
 
-        uint32_t graph_x_size, graph_y_size = 0;
+        uint32_t graph_1_size, graph_2_size = 0;
 
-        uint32_t node1 = 1112275341;
-        uint32_t node2 = 2369781988;
+        vector<UndirectedEdge> graph1 = load_graph(&graph_1_size, network1_name);
+        vector<UndirectedEdge> graph2 = load_graph(&graph_2_size, network2_name);
 
-        vector<UndirectedEdge> graphX = load_graph(&graph_x_size, network1_name);
-        vector<UndirectedEdge> graphY = load_graph(&graph_y_size, network2_name);
+        vector<uint32_t> selected_nodes = select_random_node(graph1, number_of_selected_nodes);
+
+
+        // vector<uint32_t> neighbors_nodex_1 = neighbors(graph1, nodex);
+        // int number_neighbors_nodex_1 = neighbors_nodex_1.size();
+        // vector<uint32_t> neighbors_nodey_1 = neighbors(graph1, nodey);
+        // int number_neighbors_nodey_1 = neighbors_nodey_1.size();
+        // vector<uint32_t> neighbors_nodex_2 = neighbors(graph2, nodex);
+        // int number_neighbors_nodex_2 = neighbors_nodex_2.size();
+        // vector<uint32_t> neighbors_nodey_2 = neighbors(graph2, nodey);
+        // int number_neighbors_nodey_2 = neighbors_nodey_2.size();
+
+
+        // cout << "Number of neighbors of node x in graph 1 = " << number_neighbors_nodex_1 << endl;
+        // cout << "Number of neighbors of node y in graph 1 = " << number_neighbors_nodey_1 << endl;
+        // cout << "Number of neighbors of node x in graph 2 = " << number_neighbors_nodex_2 << endl;
+        // cout << "Number of neighbors of node y in graph 2 = " << number_neighbors_nodey_2 << endl;
+
+
+        // run_clear_protocol(selected_nodes, selected_nodes, graph1, graph2);
+
+                // run_baseline_protocol_inline2(nodex, nodey, field, neighbors_nodex_1, neighbors_nodey_1,
+                //                                 neighbors_nodex_2, neighbors_nodey_2);
+
+
+                // run_new_protocol_inline(nodex, nodey, field, neighbors_nodex_1, neighbors_nodey_1,
+                //                                 neighbors_nodex_2, neighbors_nodey_2);
+
+
+        vector<UndirectedEdge> evaluated_graph = generate_complete_graph(selected_nodes);
+
+        print_graph(evaluated_graph);
+
         
-        vector<uint32_t> x_neighbors_node1 = neighbors(graphX, node1);
-        int number_x_neighbors_node1 = x_neighbors_node1.size();
-                vector<uint32_t> x_neighbors_node2 = neighbors(graphX, node2);
-        int number_x_neighbors_node2 = x_neighbors_node2.size();
-        vector<uint32_t> y_neighbors_node1 = neighbors(graphY, node1);
-        int number_y_neighbors_node1 = y_neighbors_node1.size();
-                vector<uint32_t> y_neighbors_node2 = neighbors(graphY, node2);
-        int number_y_neighbors_node2 = y_neighbors_node2.size();
-
-        // print_graph(graphX);
-        
-        run_clear_protocol(node1, node2, x_neighbors_node1, x_neighbors_node2,
-                                        y_neighbors_node1, y_neighbors_node2);
-        run_baseline_protocol_inline(node1, node2, field, x_neighbors_node1, x_neighbors_node2,
-                                        y_neighbors_node1, y_neighbors_node2);
-
-        run_new_protocol_inline(node1, node2, field, x_neighbors_node1, x_neighbors_node2,
-                                        y_neighbors_node1, y_neighbors_node2);
-
-
+        // cout << edge_exists(graph1, edge);
 
 	return 1;
 }
+
 

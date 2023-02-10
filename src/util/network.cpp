@@ -4,12 +4,12 @@ using namespace boost::asio::ip;
 
 
 
-network::network(char* role_arg, connection con_arg)
+network::network(int role_arg, connection con_arg)
 {
     role = role_arg;
     con = con_arg;
 
-    if(role == "client"){
+    if(role == 0){
         stream.connect(con.addr, std::to_string(con.port));
     if (!stream) {
         std::cerr << "Can not connect to server!" << std::endl;
@@ -20,7 +20,7 @@ network::network(char* role_arg, connection con_arg)
     }
     }
 
-    if(role == "server"){
+    if(role == 1){
         boost::asio::io_service ios;
         tcp::endpoint endpoint(tcp::v4(), con.port);
         tcp::acceptor acceptor(ios, endpoint);
@@ -63,11 +63,12 @@ int network::send_mpz(mpz_t **neighbors, int number_of_arrays, int* lengths_of_a
     }
 
     std::cout << tmp << std::endl;
+    stream.flush();
     
     return 1;
 
 
-    stream.flush();
+    
 }
 
 int network::receive_elements(int* lengths_of_arrays, mpz_t** data)
@@ -123,5 +124,7 @@ int network::receive_elements(int* lengths_of_arrays, mpz_t** data)
     // stream.flush();
 
     std::cout << "Data received " << std::endl;
+
+    return 0;
      
 }

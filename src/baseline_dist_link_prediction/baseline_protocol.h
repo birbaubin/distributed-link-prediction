@@ -18,8 +18,15 @@
 void run_baseline_protocol_inline(uint32_t node1, uint32_t node2, pk_crypto* field, 
                                 vector<uint32_t> x_neighbors_node1, vector<uint32_t> x_neighbors_node2,
                                 vector<uint32_t> y_neighbors_node1, vector<uint32_t> y_neighbors_node2);
-// void run_clear_protocol();
-uint32_t psi_ca(vector<uint32_t> set1, vector<uint32_t> set2, prime_field* field, string description);
+
+void run_baseline_protocol_inline2(uint32_t node1, uint32_t node2, pk_crypto* field, 
+                                vector<uint32_t> x_neighbors_node1, vector<uint32_t> x_neighbors_node2,
+                                vector<uint32_t> y_neighbors_node1, vector<uint32_t> y_neighbors_node2);
+
+
+uint32_t psi_ca(vector<uint32_t> set1, vector<uint32_t> set2, prime_field* field, string description, int* n_encryptions);
+
+uint32_t psi_ca2(vector<uint32_t> set1, vector<uint32_t> set2, prime_field* field, string description, int* n_encryptions);
 
 
 #endif

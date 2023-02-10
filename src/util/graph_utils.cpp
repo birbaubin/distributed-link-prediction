@@ -1,6 +1,8 @@
 #include "graph_utils.h"
 #include <iostream>
 #include <set>
+#include <random>
+
 
 
 using namespace std;
@@ -77,7 +79,7 @@ vector<uint32_t> common_neighbors(vector<UndirectedEdge> graph, uint32_t graph_s
 
 void print_graph(vector<UndirectedEdge> graph)
 {
-    for (size_t i = 0; i < 50; i++)
+    for (size_t i = 0; i < graph.size(); i++)
     {
         cout << graph.at(i).vertices[0] << "----" << graph.at(i).vertices[1] << endl;
     }
@@ -90,6 +92,62 @@ void print_vector(vector<uint32_t> vect)
     {
         cout << vect.at(i) << endl;
     }
+}
+
+vector<uint32_t> select_random_node(vector<UndirectedEdge> graph, int number_of_nodes)
+{
+
+    vector<uint32_t> result;
+    set<uint32_t> nodes;
+    for (size_t i = 0; i < graph.size(); i++)
+    {
+        nodes.insert(graph.at(i).vertices[0]);
+        nodes.insert(graph.at(i).vertices[1]);
+    }
+
+    std::random_device rd;
+    std::sample(nodes.begin(), nodes.end(), std::back_inserter(result),
+                number_of_nodes, std::mt19937{std::random_device{}()});
+
+    return result;
+
+}
+
+bool edge_exists(vector<UndirectedEdge> graph, UndirectedEdge edge)
+{
+    for (size_t i = 0; i < graph.size(); i++)
+    {
+        if((graph.at(i).vertices[0] == edge.vertices[0] && 
+            graph.at(i).vertices[1] == edge.vertices[1]) ||
+            (graph.at(i).vertices[0] == edge.vertices[1] &&
+            graph.at(i).vertices[1] == edge.vertices[0]))
+            return true;
+
+    }
+
+    return false;
+    
+}
+
+vector<UndirectedEdge> generate_complete_graph(vector<uint32_t> nodes)
+{
+
+    vector<UndirectedEdge> graph;
+
+    for (size_t i = 0; i < nodes.size(); i++)
+    {
+       for (size_t j = i+1; j < nodes.size(); j++)
+       {
+            UndirectedEdge edge;
+            edge.vertices[0] = nodes.at(i);
+            edge.vertices[1] = nodes.at(j);
+            graph.push_back(edge);
+       }
+       
+    }
+
+    return graph;
+    
 }
 
 
