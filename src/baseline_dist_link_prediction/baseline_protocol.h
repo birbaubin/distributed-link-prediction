@@ -15,13 +15,11 @@
 
 
 
-void run_baseline_protocol_inline(uint32_t node1, uint32_t node2, pk_crypto* field, 
-                                vector<uint32_t> x_neighbors_node1, vector<uint32_t> x_neighbors_node2,
-                                vector<uint32_t> y_neighbors_node1, vector<uint32_t> y_neighbors_node2);
+void run_baseline_protocol_inline(vector<UndirectedEdge> evaluated_edges, vector<UndirectedEdge> graph1, 
+                            vector<UndirectedEdge> graph2, pk_crypto* field);
 
-void run_baseline_protocol_inline2(uint32_t node1, uint32_t node2, pk_crypto* field, 
-                                vector<uint32_t> x_neighbors_node1, vector<uint32_t> x_neighbors_node2,
-                                vector<uint32_t> y_neighbors_node1, vector<uint32_t> y_neighbors_node2);
+void run_baseline_protocol_inline2(vector<UndirectedEdge> evaluated_edges, vector<UndirectedEdge> graph1, 
+                            vector<UndirectedEdge> graph2, pk_crypto* field);
 
 
 uint32_t psi_ca(vector<uint32_t> set1, vector<uint32_t> set2, prime_field* field, string description, int* n_encryptions);

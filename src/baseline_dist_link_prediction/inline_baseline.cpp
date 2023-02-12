@@ -1,44 +1,62 @@
 #include "baseline_protocol.h"
 
-void run_baseline_protocol_inline(uint32_t node1, uint32_t node2, pk_crypto* field, 
-                                vector<uint32_t> x_neighbors_node1, vector<uint32_t> x_neighbors_node2,
-                                vector<uint32_t> y_neighbors_node1, vector<uint32_t> y_neighbors_node2)
+void run_baseline_protocol_inline(vector<UndirectedEdge> evaluated_edges, vector<UndirectedEdge> graph1, 
+                            vector<UndirectedEdge> graph2, pk_crypto* field)
 {
 
-    cout << "******************************* Baseline protocol *******************************" << endl;
+   cout << "******************************* Baseline protocol *******************************" << endl;
 
 #ifdef DEBUG_TIME
     timeval t_protocol_start, t_start, t_end;
     gettimeofday(&t_protocol_start, NULL);
 #endif
 
-    int total_number_encryptions = 0;
-    int n_encryptions_cross1 = 0;
-    int n_encryptions_cross2 = 0;
-    int n_encryptions_over = 0;
 
-    // Compute local1 and local2
-    vector<uint32_t> localx = int_intersection(x_neighbors_node1, x_neighbors_node2);
-    vector<uint32_t> localy = int_intersection(y_neighbors_node1, y_neighbors_node2);
+    for (size_t i = 0; i < evaluated_edges.size(); i++)
+    {
 
-#ifndef DEBUG_TIME
-    cout << "Size of local1 = " << localx.size() << endl;
-    cout << "Size of local2 = " << localy.size() << endl;
-#endif 
+        gettimeofday(&t_start, NULL);
 
-    x_neighbors_node1 = remove_vector(x_neighbors_node1, localx);
-    y_neighbors_node1 = remove_vector(y_neighbors_node1, localy);
-    x_neighbors_node2 = remove_vector(x_neighbors_node2, localx);
-    y_neighbors_node2 = remove_vector(y_neighbors_node2, localy);
+        //get current nodes from to evaluate in this iteration 
+        uint32_t nodex = evaluated_edges.at(i).vertices[0];
+        uint32_t nodey = evaluated_edges.at(i).vertices[1];
 
-    int size_x_neighbors_node1 = x_neighbors_node1.size();
-    int size_y_neighbors_node1 = y_neighbors_node1.size();
-    int size_x_neighbors_node2 = x_neighbors_node2.size();
-    int size_y_neighbors_node2 = y_neighbors_node2.size();
+        cout << "--- Baseline link prediction for nodes " << nodex << " and node " << nodey << " ---" << endl;
+    
+        int total_number_encryptions = 0;
+        int n_encryptions_cross1 = 0;
+        int n_encryptions_cross2 = 0;
+        int n_encryptions_over = 0;
 
-    uint32_t cross1 = psi_ca(x_neighbors_node1, y_neighbors_node2, (prime_field*)field, "crossover 1", &n_encryptions_cross1);    
-    uint32_t cross2 = psi_ca(y_neighbors_node1, x_neighbors_node2, (prime_field*)field, "crossover 2", &n_encryptions_cross2);
-    uint32_t overlap = psi_ca(localx, localy, (prime_field*)field, "overlap", &n_encryptions_over);
+        //get neighbors of nodes we are doing prediction on 
+        vector<uint32_t> neighbors_nodex_1 = neighbors(graph1, nodex);
+        vector<uint32_t> neighbors_nodey_1 = neighbors(graph1, nodey);
+        vector<uint32_t> neighbors_nodex_2 = neighbors(graph2, nodex);
+        vector<uint32_t> neighbors_nodey_2 = neighbors(graph2, nodey);
+
+        // Compute local1 and local2
+        vector<uint32_t> local1 = int_intersection(neighbors_nodex_1, neighbors_nodey_1);
+        vector<uint32_t> local2 = int_intersection(neighbors_nodex_2, neighbors_nodey_2);
+
+        #ifndef DEBUG_TIME
+            cout << "Size of local1 = " << localx.size() << endl;
+            cout << "Size of local2 = " << localy.size() << endl;
+        #endif 
+
+        //remove local1 and local2 before PSI
+        neighbors_nodex_1 = remove_vector(neighbors_nodex_1, local1);
+        neighbors_nodey_1 = remove_vector(neighbors_nodey_1, local1);
+        neighbors_nodex_2 = remove_vector(neighbors_nodex_2, local2);
+        neighbors_nodey_2 = remove_vector(neighbors_nodey_2, local2);
+
+        int size_neighbors_nodex_1 = neighbors_nodex_1.size();
+        int size_neighbors_nodey_1 = neighbors_nodey_1.size();
+        int size_neighbors_nodex_2 = neighbors_nodex_2.size();
+        int size_neighbors_nodey_2 = neighbors_nodey_2.size();
+
+    uint32_t cross1 = psi_ca(neighbors_nodex_1, neighbors_nodey_2, (prime_field*)field, "crossover 1", &n_encryptions_cross1);    
+    uint32_t cross2 = psi_ca(neighbors_nodey_1, neighbors_nodex_2, (prime_field*)field, "crossover 2", &n_encryptions_cross2);
+    uint32_t overlap = psi_ca(local1, local2, (prime_field*)field, "overlap", &n_encryptions_over);
 
     // double data_x = getKBsFromMpz(x_neighbors_node1.size()) + getKBsFromMpz(x_neighbors_node2.size()) + getKBsFromMpz(localx.size());
     // double data_y = getKBsFromMpz(y_neighbors_node1.size()) + getKBsFromMpz(y_neighbors_node2.size()) 
@@ -51,20 +69,30 @@ void run_baseline_protocol_inline(uint32_t node1, uint32_t node2, pk_crypto* fie
 
 #endif
 
-    int final_score = localx.size() + localy.size() + cross2 + cross1 - overlap;
-    cout << "Score of baseline protocole : " <<  final_score << endl;
+    int final_score = local1.size() + local2.size() + cross2 + cross1 - overlap;
+
+    cout << "--- Results ---" << endl;
+    cout << "Score  : " <<  final_score << endl;
 
 #ifdef DEBUG_TIME
     gettimeofday(&t_end, NULL);    
-    cout << "Time for baseline protocol : " << std::setprecision(5) << getMillies(t_protocol_start, t_end) << " ms" << '\n';
+    cout << "Time : " << std::setprecision(5) << getMillies(t_start, t_end) << " ms" << '\n';
     total_number_encryptions = n_encryptions_cross1 + n_encryptions_cross2 + n_encryptions_over;
-    cout << "Number of encryptions in crossover1 = " << n_encryptions_cross1 << endl;
-    cout << "Number of encryptions in crossover2 = " << n_encryptions_cross2 << endl;
+    // cout << "Number of encryptions in crossover1 = " << n_encryptions_cross1 << endl;
+    // cout << "Number of encryptions in crossover2 = " << n_encryptions_cross2 << endl;
 
-    cout << "Number of encryptions in overlap = " << n_encryptions_over << endl;
+    // cout << "Number of encryptions in overlap = " << n_encryptions_over << endl;
     cout << "Total number of encryptions = " << total_number_encryptions << endl;
     
 #endif
+
+    }
+
+    #ifdef DEBUG_TIME
+    cout << "Time for all baseline predictions : " << std::setprecision(5)
+                         << getMillies(t_protocol_start, t_end) << " ms" << '\n';
+    #endif
+
     
 }
 
