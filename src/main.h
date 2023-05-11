@@ -7,9 +7,6 @@
 #include "util/data_loader.h"
 #include "util/flags.h"
 #include "util/graph_utils.h"
-#include "tests/test_crypto.h"
-#include "new_dist_link_prediction/new_protocol.h"
-#include "baseline_dist_link_prediction/baseline_protocol.h"
 #include "util/parse_options.h"
 
 using namespace std;
