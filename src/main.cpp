@@ -22,7 +22,9 @@ int main(int argc, char** argv)
         vector<UndirectedEdge> graph1 = load_graph(&graph_1_size, network1_name);
         vector<UndirectedEdge> graph2 = load_graph(&graph_2_size, network2_name);
 
-        vector<uint32_t> selected_nodes = select_random_node(graph1, number_of_selected_nodes);
+//        vector<uint32_t> selected_nodes = select_random_node(graph1, number_of_selected_nodes);
+
+        vector<uint32_t> selected_nodes = {3, 5};
 
         vector<UndirectedEdge> evaluated_graph = generate_complete_graph(selected_nodes);
 
