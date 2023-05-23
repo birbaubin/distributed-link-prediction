@@ -2,10 +2,10 @@
 
 using namespace std;
 
-void run_clear_protocol(vector<UndirectedEdge> evaluated_edges,  vector<UndirectedEdge> graph1, vector<UndirectedEdge> graph2)
+void run_clear_protocol(vector<UndirectedEdge> evaluated_edges,  vector<UndirectedEdge> graph1, vector<UndirectedEdge> graph2, string metric)
 {
 
-    cout << "******************************* Cleartext protocol between node *******************************" << endl;
+    cout << "******************************* Cleartext protocol between node using metric " << metric << " *******************************" << endl;
 
     timeval t_protocol_start, t_start, t_end;
     uint32_t graph_x_size, graph_y_size = 0;
@@ -38,9 +38,22 @@ void run_clear_protocol(vector<UndirectedEdge> evaluated_edges,  vector<Undirect
     
             vector<uint32_t> intersection = int_intersection(neighbors_nodex, neighbors_nodey);
 
+
+            float score = 0;
+
+            if(metric == "neighbors") score = intersection.size();
+            else if (metric == "jaccard"){
+                vector<uint32_t> big_union = int_union(neighbors_nodex, neighbors_nodey);
+
+                score = (float) intersection.size() / big_union.size();
+            }
+            else if (metric == "cosine"){
+                score = (float) intersection.size() / (sqrt(neighbors_nodex.size()) * sqrt(neighbors_nodey.size()) + 1e-10);
+            }
+
             cout << "--- Results ---" << endl;
 
-            cout << "Score : " << intersection.size() << endl;
+            cout << "Score : " << score << endl;
 
             #ifdef DEBUG_TIME
                 gettimeofday(&t_end, NULL);
@@ -61,12 +74,13 @@ void run_clear_protocol(vector<UndirectedEdge> evaluated_edges,  vector<Undirect
 
 
 void run_new_protocol_inline(vector<UndirectedEdge> evaluated_edges, vector<UndirectedEdge> graph1, 
-vector<UndirectedEdge> graph2, pk_crypto* field, bool with_memory)
+vector<UndirectedEdge> graph2, pk_crypto* field, string metric, bool with_memory)
 {
 
     string memory_str = with_memory ? " with memory ": " without memory ";
 
-    cout << "******************************* Private Protocol" << memory_str <<"********************************" << endl;
+    cout << "******************************* Private Protocol" << memory_str <<"using metric " <<
+    metric << " ********************************" << endl;
 
     #ifdef DEBUG_TIME
         timeval t_protocol_start, t_start, t_end;
@@ -318,85 +332,7 @@ vector<UndirectedEdge> graph2, pk_crypto* field, bool with_memory)
             t_start = t_end;
         #endif
 
-        int union_node1_size = encrypted_neighbors_nodex_1.size() + encrypted_neighbors_nodex_2.size();
-       
-        mpz_t encrypted_union_node1[union_node1_size];
-
-        for (size_t i = 0; i < union_node1_size; i++)
-        {
-            mpz_init(encrypted_union_node1[i]);
-        }
-
-        mpz_t array_enc_neighbors_nodex_1[encrypted_neighbors_nodex_1.size()];
-        mpz_t array_enc_neighbors_nodex_2[encrypted_neighbors_nodex_2.size()];
-
-
-        for (size_t i = 0; i < encrypted_neighbors_nodex_2.size(); i++)
-        {
-           mpz_init_set(array_enc_neighbors_nodex_2[i], 
-                        encrypted_neighbors_nodex_2.at(i).get_mpz_t());
-        }
-
-        for (size_t i = 0; i < encrypted_neighbors_nodex_1.size(); i++)
-        {
-           mpz_init_set(array_enc_neighbors_nodex_1[i], 
-                        encrypted_neighbors_nodex_1.at(i).get_mpz_t());
-        }
-        
-    
-        mpz_union(array_enc_neighbors_nodex_1, encrypted_neighbors_nodex_1.size(),
-                    array_enc_neighbors_nodex_2, encrypted_neighbors_nodex_2.size(),
-                    encrypted_union_node1, &union_node1_size);
-
-        #ifdef DEBUG_STEPS
-            gettimeofday(&t_end, NULL);
-            cout << "Time for computing first union : " << std::setprecision(5) << getMillies(t_start, t_end) << " ms" << '\n';
-            t_start = t_end;
-        #endif
-
-
-        int union_node2_size = encrypted_neighbors_nodey_1.size() + encrypted_neighbors_nodey_2.size();
-        mpz_t encrypted_union_node2[union_node2_size];
-
-        for (size_t i = 0; i < union_node2_size; i++)
-        {
-            mpz_init(encrypted_union_node2[i]);
-        }
-
-        mpz_t array_enc_neighbors_nodey_1[encrypted_neighbors_nodey_1.size()];
-        mpz_t array_enc_neighbors_nodey_2[encrypted_neighbors_nodey_2.size()];
-
-
-        for (size_t i = 0; i < encrypted_neighbors_nodey_2.size(); i++)
-        {
-           mpz_init_set(array_enc_neighbors_nodey_2[i], 
-                        encrypted_neighbors_nodey_2.at(i).get_mpz_t());
-        }
-
-        for (size_t i = 0; i < encrypted_neighbors_nodey_1.size(); i++)
-        {
-           mpz_init_set(array_enc_neighbors_nodey_1[i], 
-                        encrypted_neighbors_nodey_1.at(i).get_mpz_t());
-        }
-    
-
-        mpz_union(array_enc_neighbors_nodey_1, encrypted_neighbors_nodey_1.size(),
-                    array_enc_neighbors_nodey_2, encrypted_neighbors_nodey_2.size(),
-                    encrypted_union_node2, &union_node2_size);
-
-        #ifdef DEBUG_STEPS
-            gettimeofday(&t_end, NULL);
-            cout << "Time for computing second union : " << std::setprecision(5) << getMillies(t_start, t_end) << " ms" << '\n';
-            t_start = t_end;
-        #endif
-
-        int intersection_size = 0;
-        mpz_t encrypted_intersection[union_node2_size];
-
-        mpz_intersection(encrypted_union_node1, union_node1_size, 
-                        encrypted_union_node2, union_node2_size, 
-                        encrypted_intersection, &union_node2_size);
-
+        float score = compute_similarity_score(encrypted_neighbors_nodex_1, encrypted_neighbors_nodex_2, encrypted_neighbors_nodey_1, encrypted_neighbors_nodey_2, metric);
  
         #ifdef DEBUG_STEPS
             gettimeofday(&t_end, NULL);
@@ -406,7 +342,7 @@ vector<UndirectedEdge> graph2, pk_crypto* field, bool with_memory)
 
         cout << "--- Results ---" << endl;
 
-        cout << "Score : " << union_node2_size << endl;
+        cout << "Score : " << score << endl;
 
         #ifdef DEBUG_TIME
             gettimeofday(&t_end, NULL);
@@ -446,9 +382,113 @@ vector<UndirectedEdge> graph2, pk_crypto* field, bool with_memory)
     #endif
     
     }
+}
+
+float compute_similarity_score(vector<mpz_class> encrypted_neighbors_nodex_1,
+                              vector<mpz_class>  encrypted_neighbors_nodex_2,
+                              vector<mpz_class>  encrypted_neighbors_nodey_1,
+                              vector<mpz_class>  encrypted_neighbors_nodey_2,
+                              string metric )
+{
+    int union_node1_size = encrypted_neighbors_nodex_1.size() + encrypted_neighbors_nodex_2.size();
+
+    mpz_t encrypted_union_node1[union_node1_size];
+
+    for (size_t i = 0; i < union_node1_size; i++)
+    {
+        mpz_init(encrypted_union_node1[i]);
+    }
+
+    mpz_t array_enc_neighbors_nodex_1[encrypted_neighbors_nodex_1.size()];
+    mpz_t array_enc_neighbors_nodex_2[encrypted_neighbors_nodex_2.size()];
 
 
-    
+    for (size_t i = 0; i < encrypted_neighbors_nodex_2.size(); i++)
+    {
+        mpz_init_set(array_enc_neighbors_nodex_2[i],
+                     encrypted_neighbors_nodex_2.at(i).get_mpz_t());
+    }
 
+    for (size_t i = 0; i < encrypted_neighbors_nodex_1.size(); i++)
+    {
+        mpz_init_set(array_enc_neighbors_nodex_1[i],
+                     encrypted_neighbors_nodex_1.at(i).get_mpz_t());
+    }
+
+
+    mpz_union(array_enc_neighbors_nodex_1, encrypted_neighbors_nodex_1.size(),
+              array_enc_neighbors_nodex_2, encrypted_neighbors_nodex_2.size(),
+              encrypted_union_node1, &union_node1_size);
+
+//#ifdef DEBUG_STEPS
+//    gettimeofday(&t_end, NULL);
+//    cout << "Time for computing first union : " << std::setprecision(5) << getMillies(t_start, t_end) << " ms" << '\n';
+//    t_start = t_end;
+//#endif
+
+
+    int union_node2_size = encrypted_neighbors_nodey_1.size() + encrypted_neighbors_nodey_2.size();
+    mpz_t encrypted_union_node2[union_node2_size];
+
+    for (size_t i = 0; i < union_node2_size; i++)
+    {
+        mpz_init(encrypted_union_node2[i]);
+    }
+
+    mpz_t array_enc_neighbors_nodey_1[encrypted_neighbors_nodey_1.size()];
+    mpz_t array_enc_neighbors_nodey_2[encrypted_neighbors_nodey_2.size()];
+
+
+    for (size_t i = 0; i < encrypted_neighbors_nodey_2.size(); i++)
+    {
+        mpz_init_set(array_enc_neighbors_nodey_2[i],
+                     encrypted_neighbors_nodey_2.at(i).get_mpz_t());
+    }
+
+    for (size_t i = 0; i < encrypted_neighbors_nodey_1.size(); i++)
+    {
+        mpz_init_set(array_enc_neighbors_nodey_1[i],
+                     encrypted_neighbors_nodey_1.at(i).get_mpz_t());
+    }
+
+
+    mpz_union(array_enc_neighbors_nodey_1, encrypted_neighbors_nodey_1.size(),
+              array_enc_neighbors_nodey_2, encrypted_neighbors_nodey_2.size(),
+              encrypted_union_node2, &union_node2_size);
+
+//#ifdef DEBUG_STEPS
+//    gettimeofday(&t_end, NULL);
+//    cout << "Time for computing second union : " << std::setprecision(5) << getMillies(t_start, t_end) << " ms" << '\n';
+//    t_start = t_end;
+//#endif
+
+    float score = 0;
+    int intersection_size = union_node2_size;
+    mpz_t encrypted_intersection[intersection_size];
+
+    mpz_intersection(encrypted_union_node1, union_node1_size,
+                     encrypted_union_node2, union_node2_size,
+                     encrypted_intersection, &intersection_size);
+
+    if(metric == "neighbors") score = intersection_size;
+    else if (metric == "cosine")
+    {
+        score = (float) intersection_size /(sqrt(union_node2_size) * sqrt(union_node1_size) + 1e-10);
+    }
+    else if (metric == "jaccard")
+    {
+        int big_union_size = union_node2_size + union_node1_size;
+        mpz_t encrypted_big_union[big_union_size];
+        for (size_t i = 0; i < big_union_size; i++)
+        {
+            mpz_init(encrypted_big_union[i]);
+        }
+
+        mpz_union(encrypted_union_node1, union_node1_size, encrypted_union_node2, union_node2_size, encrypted_big_union, &big_union_size);
+
+        score = (float)intersection_size/big_union_size;
+    }
+
+    return score;
 
 }
