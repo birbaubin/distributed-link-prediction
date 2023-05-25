@@ -9,6 +9,7 @@
 #include "util/graph_utils.h"
 #include "util/ecc_utils.h"
 #include "util/helpers.h"
+#include "new_dist_link_prediction/new_protocol.h"
 
 using namespace std;
 
@@ -29,116 +30,27 @@ void print_ec_point(const EC_GROUP *group, const EC_POINT *point) {
 
 
 int main() {
-    // Initialize OpenSSL components
 
-    timeval t_start, t_end;
-    gettimeofday(&t_start, NULL);
+    int number_of_selected_nodes = 10;
+    string dataset_name = "email.csv";
 
-
-    EC_GROUP *group;
-    EC_POINT *base, *result;
-    BN_CTX *ctx;
-    BIGNUM *neighbor;
-
-    OpenSSL_add_all_algorithms();
-    ERR_load_crypto_strings();
-
-    // Seed the random number generator
-    srand(static_cast<unsigned int>(time(NULL)));
-    RAND_poll();
-
-    group = EC_GROUP_new_by_curve_name(NID_secp256k1);
-    base = EC_POINT_new(group);
-    result = EC_POINT_new(group);
-    EC_POINT_copy(base, EC_GROUP_get0_generator(group));
+    string network1_name = "datasets/net1-"+dataset_name;
+    string network2_name = "datasets/net2-"+dataset_name;
 
 
-    // Create BIGNUM context
-    ctx = BN_CTX_new();
+    uint32_t graph_1_size, graph_2_size = 0;
 
-    // Create modulus 2^256
-    BIGNUM *modulus = BN_new();
-    BN_set_bit(modulus, 256);
+    vector<UndirectedEdge> graph1 = load_graph(&graph_1_size, network1_name);
+    vector<UndirectedEdge> graph2 = load_graph(&graph_2_size, network2_name);
 
-    uint32_t graph_size1 = 0;
-    uint32_t graph_size2 = 0;
+//    vector<uint32_t> selected_nodes = select_random_node(graph1, number_of_selected_nodes);
 
+    vector<uint32_t> selected_nodes = {3,  4, 6, 5};
 
-    std::vector<UndirectedEdge> graph1 = load_graph(&graph_size1, "datasets/net1-email.csv");
-    std::vector<UndirectedEdge> graph2 = load_graph(&graph_size2, "datasets/net2-email.csv");
+    vector<UndirectedEdge> evaluated_graph = generate_complete_graph(selected_nodes);
+    run_clear_protocol(evaluated_graph, graph1, graph2, "neighbors");
+    run_new_protocol_inline(evaluated_graph, graph1, graph2, "neighbors", true);
 
-    uint32_t  nodex = 3;
-    uint32_t nodey = 3;
-
-    vector<::uint32_t> neighbors_nodex_graph1 = neighbors(graph1, nodex);
-    vector<::uint32_t> neighbors_nodex_graph2 = neighbors(graph2, nodex);
-    vector<::uint32_t> neighbors_nodey_graph1 = neighbors(graph1, nodey);
-    vector<::uint32_t> neighbors_nodey_graph2 = neighbors(graph2, nodey);
-
-    vector<EC_POINT*> encrypted_neighbors_nodex_graph1;
-    vector<EC_POINT*> encrypted_neighbors_nodey_graph1;
-    vector<EC_POINT*> encrypted_neighbors_nodex_graph2;
-    vector<EC_POINT*> encrypted_neighbors_nodey_graph2;
-
-    neighbor = BN_new();
-
-
-    for(int i = 0; i < neighbors_nodex_graph1.size(); i++)
-    {
-        EC_POINT *tmp = EC_POINT_new(group);
-        BN_set_word(neighbor, neighbors_nodex_graph1.at(i));
-        EC_POINT_mul(group, tmp, NULL, base, neighbor, ctx);
-        encrypted_neighbors_nodex_graph1.push_back(tmp);
-    }
-
-    for(int i = 0; i < neighbors_nodey_graph1.size(); i++)
-    {
-        EC_POINT *tmp = EC_POINT_new(group);
-        BN_set_word(neighbor, neighbors_nodey_graph1.at(i));
-        EC_POINT_mul(group, tmp, NULL, base, neighbor, ctx);
-        encrypted_neighbors_nodey_graph1.push_back(tmp);
-    }
-
-    for(int i = 0; i < neighbors_nodex_graph2.size(); i++)
-    {
-        EC_POINT *tmp = EC_POINT_new(group);
-        BN_set_word(neighbor, neighbors_nodex_graph2.at(i));
-        EC_POINT_mul(group, tmp, NULL, base, neighbor, ctx);
-        encrypted_neighbors_nodex_graph2.push_back(tmp);
-    }
-
-    for(int i = 0; i < neighbors_nodey_graph2.size(); i++)
-    {
-        EC_POINT *tmp = EC_POINT_new(group);
-        BN_set_word(neighbor, neighbors_nodey_graph2.at(i));
-        EC_POINT_mul(group, tmp, NULL, base, neighbor, ctx);
-        encrypted_neighbors_nodey_graph2.push_back(tmp);
-    }
-
-    vector<EC_POINT*> neighbors_nodex = union_of_vectors(encrypted_neighbors_nodex_graph1, encrypted_neighbors_nodex_graph2, group, ctx);
-
-    vector<EC_POINT*> neighbors_nodey = union_of_vectors(encrypted_neighbors_nodey_graph1, encrypted_neighbors_nodey_graph2, group, ctx);
-
-    vector<EC_POINT*> common_neighbors = intersection_of_vectors(neighbors_nodex, neighbors_nodey, group);
-
-    cout << "Size of intersection : " << common_neighbors.size() << endl;
-
-    gettimeofday(&t_end, NULL);
-
-    cout << "Time : " << std::setprecision(5)
-         << getMillies(t_start, t_end) << " ms" << '\n';
-
-
-    BN_free(neighbor);
-//    BN_free(inverse);
-    BN_free(modulus);
-    BN_CTX_free(ctx);
-    EC_POINT_free(base);
-    EC_POINT_free(result);
-    EC_GROUP_free(group);
-    // Clean up OpenSSL components
-    EVP_cleanup();
-    ERR_free_strings();
 
     return 0;
 }
