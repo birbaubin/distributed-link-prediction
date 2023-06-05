@@ -1,7 +1,7 @@
 #include "data_loader.h"
 
 // using namespace std;
-vector<UndirectedEdge> load_graph(uint32_t* size,  std::string filename)
+unordered_map<uint32_t, vector<uint32_t> > load_graph(std::string filename)
 {
     uint32_t nlines = 0;
 	ifstream infile(filename.c_str());
@@ -17,33 +17,88 @@ vector<UndirectedEdge> load_graph(uint32_t* size,  std::string filename)
 		nlines++;
     }
 
-	*size = nlines;
 	infile.clear();
 	infile.seekg(ios::beg);
 
 	string source, target;
 
 	uint32_t i = 0;
-	UndirectedEdge* current_edge = (UndirectedEdge*) malloc(sizeof(UndirectedEdge));
 
+    unordered_map<uint32_t, vector<uint32_t> > graph;
 	vector<UndirectedEdge> local_graph;
-	while(getline(infile, line)) 
+	while(getline(infile, line))
     {
 		stringstream str(line);
 		std::getline(str, source, ',');
 		std::getline(str, target, ',');
-		
-		current_edge->vertices[0]= stol(source);
-		current_edge->vertices[1]= stol(target);
-		// local_graph[i].vertices[0] = stoul(source);
-		// local_graph[i].vertices[1] = stoul(target);
 
-		local_graph.push_back(*current_edge);
+        uint32_t int_source = stol(source);
+        uint32_t int_target = stol(target);
+
+        if(graph.find(int_source) != graph.end()){
+            graph.at(int_source).push_back(int_target);
+        }
+        else{
+            vector<uint32_t> neighbors;
+            neighbors.push_back(int_target);
+            graph.insert({int_source, neighbors});
+        }
 
 		i++;
 
     }
 
-	return local_graph;
+	return graph;
 	
 }
+
+//vector<uint32_t> > get_nodes_of_graph(std::string filename)
+//{
+//    uint32_t nlines = 0;
+//    ifstream infile(filename.c_str());
+//
+//    if(!infile.good()) {
+//        cerr << "Input file " << filename << " does not exist, program exiting!" << endl;
+//        exit(0);
+//    }
+//
+//    string line;
+//    while(getline(infile, line))
+//    {
+//        nlines++;
+//    }
+//
+//    infile.clear();
+//    infile.seekg(ios::beg);
+//
+//    string source, target;
+//
+//    uint32_t i = 0;
+//
+//    unordered_map<uint32_t, vector<uint32_t> > graph;
+//    vector<UndirectedEdge> local_graph;
+//    while(getline(infile, line))
+//    {
+//        stringstream str(line);
+//        std::getline(str, source, ',');
+//        std::getline(str, target, ',');
+//
+//        uint32_t int_source = stol(source);
+//        uint32_t int_target = stol(target);
+//
+//        if(graph.find(int_source) != graph.end()){
+//            graph.at(int_source).push_back(int_target);
+//        }
+//        else{
+//            vector<uint32_t> neighbors;
+//            neighbors.push_back(int_target);
+//            graph.insert({int_source, neighbors});
+//        }
+//
+//        i++;
+//
+//    }
+//
+//    return graph;
+//
+//}

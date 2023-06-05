@@ -21,8 +21,8 @@ std::vector<EC_POINT*> union_of_vectors(std::vector<EC_POINT*> &vec1, std::vecto
 
 std::vector<EC_POINT *> intersection_of_vectors(std::vector<EC_POINT *> &v1, std::vector<EC_POINT *> &v2, EC_GROUP *group, BN_CTX *ctx);
 
+size_t size_of_vector(std::vector<EC_POINT*> vec, EC_GROUP* group, BN_CTX* ctx);
 
-#define SIZE_OF_POINT 65
 
 
 #endif //DISTRIBUTED_LINK_PREDICTION_ECC_UTILS_H

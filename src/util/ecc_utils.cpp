@@ -4,7 +4,6 @@
 
 #include "ecc_utils.h"
 
-using namespace std;
 
 std::vector<EC_POINT*> union_of_vectors(std::vector<EC_POINT*> &vec1, std::vector<EC_POINT*> &vec2, EC_GROUP *group, BN_CTX *ctx) {
 
@@ -12,22 +11,34 @@ std::vector<EC_POINT*> union_of_vectors(std::vector<EC_POINT*> &vec1, std::vecto
     std::vector<EC_POINT*> unionVec;
 
     for (EC_POINT* point : vec1) {
-        std::vector<unsigned char> pointBytes(SIZE_OF_POINT);
-        EC_POINT_point2oct(group, point, POINT_CONVERSION_COMPRESSED, pointBytes.data(), pointBytes.size(), ctx);
+        std::vector<unsigned char> pointBytes(256);
+        size_t len = EC_POINT_point2oct(group, point, POINT_CONVERSION_COMPRESSED, pointBytes.data(), pointBytes.size(), ctx);
+        pointBytes.resize(len);
         if (pointSet.insert(pointBytes).second) {
             unionVec.push_back(point);
         }
     }
 
     for (EC_POINT* point : vec2) {
-        std::vector<unsigned char> pointBytes(SIZE_OF_POINT);
-        EC_POINT_point2oct(group, point, POINT_CONVERSION_COMPRESSED, pointBytes.data(), pointBytes.size(), ctx);
+        std::vector<unsigned char> pointBytes(256);
+        size_t len = EC_POINT_point2oct(group, point, POINT_CONVERSION_COMPRESSED, pointBytes.data(), pointBytes.size(), ctx);
+        pointBytes.resize(len);
         if (pointSet.insert(pointBytes).second) {
             unionVec.push_back(point);
         }
     }
 
     return unionVec;
+}
+
+size_t size_of_vector(std::vector<EC_POINT*> vec, EC_GROUP* group, BN_CTX* ctx)
+{
+    std::vector<unsigned char> pointBytes(256);
+    if(vec.empty())
+        return 0;
+
+    size_t len = EC_POINT_point2oct(group, vec.at(0), POINT_CONVERSION_COMPRESSED, pointBytes.data(), pointBytes.size(), ctx);
+    return len*vec.size();
 }
 
 //struct EcPointComparator {

@@ -1,14 +1,9 @@
 #include <iostream>
 #include <openssl/bn.h>
-#include <openssl/rand.h>
-#include <openssl/err.h>
 #include <openssl/ec.h>
-#include <openssl/obj_mac.h>
 #include "util/typedefs.h"
 #include "util/data_loader.h"
 #include "util/graph_utils.h"
-#include "util/ecc_utils.h"
-#include "util/helpers.h"
 #include "new_dist_link_prediction/new_protocol.h"
 
 using namespace std;
@@ -31,25 +26,28 @@ void print_ec_point(const EC_GROUP *group, const EC_POINT *point) {
 
 int main() {
 
-    int number_of_selected_nodes = 10;
-    string dataset_name = "email.csv";
+    int number_of_selected_nodes = 142;
+    string dataset_name = "flickr.csv";
 
     string network1_name = "datasets/net1-"+dataset_name;
     string network2_name = "datasets/net2-"+dataset_name;
-
-
     uint32_t graph_1_size, graph_2_size = 0;
 
-    vector<UndirectedEdge> graph1 = load_graph(&graph_1_size, network1_name);
-    vector<UndirectedEdge> graph2 = load_graph(&graph_2_size, network2_name);
+    unordered_map<uint32_t, vector<uint32_t>> graph1 = load_graph(network1_name);
+    unordered_map<uint32_t, vector<uint32_t>> graph2 = load_graph(network2_name);
+    unordered_map<uint32_t, vector<uint32_t>> groundtruth = load_graph("datasets/"+ dataset_name);
 
-//    vector<uint32_t> selected_nodes = select_random_node(graph1, number_of_selected_nodes);
+//    vector<uint32_t> selected_nodes = select_random_node(groundtruth, number_of_selected_nodes);
 
-    vector<uint32_t> selected_nodes = {3,  4, 6, 5};
+    vector<uint32_t> selected_nodes = get_nodes_of_graph(groundtruth);
 
-    vector<UndirectedEdge> evaluated_graph = generate_complete_graph(selected_nodes);
-    run_clear_protocol(evaluated_graph, graph1, graph2, "neighbors");
-    run_new_protocol_inline(evaluated_graph, graph1, graph2, "neighbors", true);
+//    vector<uint32_t> selected_nodes = {3, 4, 5};
+
+    vector<UndirectedEdge> evaluated_edges = generate_complete_graph(selected_nodes);
+
+//    print_graph(groundtruth);
+//    run_clear_protocol(evaluated_edges, graph1, graph2, "neighbors", dataset_name);
+    run_new_protocol_inline(evaluated_edges, graph1, graph2, "neighbors", true, dataset_name);
 
 
     return 0;

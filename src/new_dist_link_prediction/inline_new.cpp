@@ -2,7 +2,8 @@
 
 using namespace std;
 
-void run_clear_protocol(vector<UndirectedEdge> evaluated_edges,  vector<UndirectedEdge> graph1, vector<UndirectedEdge> graph2, string metric)
+void run_clear_protocol(vector<UndirectedEdge> evaluated_edges,  unordered_map<uint32_t, vector<uint32_t> > graph1,
+                        unordered_map<uint32_t, vector<uint32_t> > graph2, string metric, string dataset_name )
 {
 
     cout << "******************************* Cleartext protocol between node using metric " << metric << " *******************************" << endl;
@@ -18,52 +19,63 @@ void run_clear_protocol(vector<UndirectedEdge> evaluated_edges,  vector<Undirect
     for (size_t i = 0; i < evaluated_edges.size(); i++)
     {
         
-            #ifdef DEBUG_TIME
-                gettimeofday(&t_start, NULL);
-            #endif
+        #ifdef DEBUG_TIME
+            gettimeofday(&t_start, NULL);
+        #endif
 
-            uint32_t nodex = evaluated_edges.at(i).vertices[0];
-            uint32_t nodey = evaluated_edges.at(i).vertices[1];
+        uint32_t nodex = evaluated_edges.at(i).vertices[0];
+        uint32_t nodey = evaluated_edges.at(i).vertices[1];
 
-            cout << "--- Cleartext link prediction for nodes " << nodex << " and node " << nodey << " ---" << endl;
-
-            vector<uint32_t> neighbors_nodex_1 = neighbors(graph1, nodex);
-            vector<uint32_t> neighbors_nodey_1 = neighbors(graph1, nodey);
-            vector<uint32_t> neighbors_nodex_2 = neighbors(graph2, nodex);
-            vector<uint32_t> neighbors_nodey_2 = neighbors(graph2, nodey);
-
-            vector<uint32_t> neighbors_nodex = int_union(neighbors_nodex_1, neighbors_nodex_2);
-
-            cout << "Size of union1 : " << neighbors_nodex.size() << endl;
-
-            vector<uint32_t> neighbors_nodey = int_union(neighbors_nodey_1, neighbors_nodey_2);
-
-            cout << "Size of union2 : " << neighbors_nodey.size() << endl;
-
-            vector<uint32_t> intersection = int_intersection(neighbors_nodex, neighbors_nodey);
+        cout << "--- Cleartext link prediction for nodes " << nodex << " and node " << nodey << " ---" << endl;
 
 
-            float score = 0;
+        vector<uint32_t> neighbors_nodex_1;
+        vector<uint32_t> neighbors_nodey_1;
+        vector<uint32_t> neighbors_nodex_2;
+        vector<uint32_t> neighbors_nodey_2;
 
-            if(metric == "neighbors") score = intersection.size();
-            else if (metric == "jaccard"){
-                vector<uint32_t> big_union = int_union(neighbors_nodex, neighbors_nodey);
+        if (graph1.find(nodex) != graph1.end()) neighbors_nodex_1 = graph1.at(nodex);
+        if (graph1.find(nodey) != graph1.end()) neighbors_nodey_1 = graph1.at(nodey);
+        if (graph2.find(nodex) != graph1.end()) neighbors_nodex_2 = graph2.at(nodex);
+        if (graph2.find(nodey) != graph1.end()) neighbors_nodey_2 = graph2.at(nodey);
 
-                score = (float) intersection.size() / big_union.size();
-            }
-            else if (metric == "cosine"){
-                score = (float) intersection.size() / (sqrt(neighbors_nodex.size()) * sqrt(neighbors_nodey.size()) + 1e-10);
-            }
+//            cout << "Number of neighbors of " << nodex << " in graph1 " << neighbors_nodex_1.size() << endl;
+//            cout << "Number of neighbors of " << nodey << " in graph1 " << neighbors_nodey_1.size() << endl;
+//            cout << "Number of neighbors of " << nodex << " in graph2 " << neighbors_nodex_2.size() << endl;
+//            cout << "Number of neighbors of " << nodey << " in graph2 " << neighbors_nodey_2.size() << endl;
 
-            cout << "--- Results ---" << endl;
+        vector<uint32_t> neighbors_nodex = int_union(neighbors_nodex_1, neighbors_nodex_2);
 
-            cout << "Score : " << score << endl;
+//        cout << "Size of union1 : " << neighbors_nodex.size() << endl;
 
-            #ifdef DEBUG_TIME
-                gettimeofday(&t_end, NULL);
-                        cout << "Time : " << std::setprecision(5)
-                         << getMillies(t_start, t_end) << " ms" << '\n';
-            #endif
+        vector<uint32_t> neighbors_nodey = int_union(neighbors_nodey_1, neighbors_nodey_2);
+
+//        cout << "Size of union2 : " << neighbors_nodey.size() << endl;
+
+        vector<uint32_t> intersection = int_intersection(neighbors_nodex, neighbors_nodey);
+
+
+        float score = 0;
+
+        if(metric == "neighbors") score = intersection.size();
+        else if (metric == "jaccard"){
+            vector<uint32_t> big_union = int_union(neighbors_nodex, neighbors_nodey);
+
+            score = (float) intersection.size() / big_union.size();
+        }
+        else if (metric == "cosine"){
+            score = (float) intersection.size() / (sqrt(neighbors_nodex.size()) * sqrt(neighbors_nodey.size()) + 1e-10);
+        }
+
+        cout << "--- Results ---" << endl;
+
+        cout << "Score : " << score << endl;
+
+        #ifdef DEBUG_TIME
+            gettimeofday(&t_end, NULL);
+                    cout << "Time : " << std::setprecision(5)
+                     << getMillies(t_start, t_end) << " ms" << '\n';
+        #endif
 
     }
 
@@ -74,8 +86,8 @@ void run_clear_protocol(vector<UndirectedEdge> evaluated_edges,  vector<Undirect
     
 }
 
-void run_new_protocol_inline(vector<UndirectedEdge> evaluated_edges, vector<UndirectedEdge> graph1, 
-vector<UndirectedEdge> graph2, string metric, bool with_memory)
+void run_new_protocol_inline(vector<UndirectedEdge> evaluated_edges, unordered_map<uint32_t, vector<uint32_t> > graph1,
+                             unordered_map<uint32_t, vector<uint32_t> > graph2, string metric, bool with_memory, string dataset_name)
 {
 
     string memory_str = with_memory ? " with memory ": " without memory ";
@@ -115,7 +127,11 @@ vector<UndirectedEdge> graph2, string metric, bool with_memory)
     BN_rand_range(beta, modulo);
 
 
-    std::unordered_map<int, vector<EC_POINT*>> memory_1, memory_2;
+    std::unordered_map<uint32_t, EC_POINT*> encryption_memory1;
+    std::unordered_map<uint32_t, EC_POINT*> encryption_memory2;
+
+    ofstream logs("logs/ecc-"+dataset_name);
+    logs << "nodex,nodey,offline_time1,online_time1,offline_time2,online_time2,union_time,intersection_time,ai,bi,ai_prime,bi_prime,ci,di,score\n";
 
 
     for (size_t i = 0; i < evaluated_edges.size(); i++)
@@ -123,7 +139,12 @@ vector<UndirectedEdge> graph2, string metric, bool with_memory)
 
 #ifdef DEBUG_TIME
         timeval t_start, t_end;
-        double offline_time1, offline_time2, online_time1, online_time2, union_time, intersection_time = 0;
+        double offline_time1 = 0;
+        double offline_time2 = 0;
+        double online_time1 = 0;
+        double online_time2 = 0;
+        double union_time = 0;
+        double intersection_time = 0;
 
 #endif
 
@@ -132,146 +153,64 @@ vector<UndirectedEdge> graph2, string metric, bool with_memory)
         uint32_t  nodex = evaluated_edges.at(i).vertices[0];
         uint32_t nodey = evaluated_edges.at(i).vertices[1];
 
+        cout << "********* nodes " << nodex << " and " << nodey << "********" << endl;
+
         vector<EC_POINT*> encrypted_neighbors_nodex_graph1;
         vector<EC_POINT*> encrypted_neighbors_nodey_graph1;
         vector<EC_POINT*> encrypted_neighbors_nodex_graph2;
         vector<EC_POINT*> encrypted_neighbors_nodey_graph2;
 
-        if(memory_1.find(nodex) != memory_1.end() && with_memory)
-        {
-            gettimeofday(&t_start, NULL);
-            encrypted_neighbors_nodex_graph1 = memory_1.at(nodex);
-            gettimeofday(&t_end, NULL);
-            online_time1 = online_time1 + getMillies(t_start, t_end);
-        }
-        else
-        {
 
-            gettimeofday(&t_start, NULL);
-            vector<uint32_t> neighbors_nodex_graph1 = neighbors(graph1, nodex);
+        gettimeofday(&t_start, NULL);
+        encrypted_neighbors_nodex_graph1 =  get_encrypted_neighbors( &encryption_memory1, nodex, graph1, with_memory,group,
+                                                                    base, alpha, ctx);
 
-            //g^ai*alpha
-            for(int i = 0; i < neighbors_nodex_graph1.size(); i++)
-            {
-                tmp = EC_POINT_new(group);
-                BN_set_word(neighbor, neighbors_nodex_graph1.at(i));
-                EC_POINT_mul(group, tmp, NULL, base, neighbor, ctx);
-                EC_POINT_mul(group, tmp, NULL, tmp, alpha, ctx);
-                encrypted_neighbors_nodex_graph1.push_back(tmp);
-            }
+        encrypted_neighbors_nodey_graph1 =  get_encrypted_neighbors( &encryption_memory1, nodey, graph1, with_memory,group,
+                                                                    base, alpha, ctx);
 
-            memory_1.insert({nodex, encrypted_neighbors_nodex_graph1});
+        gettimeofday(&t_end, NULL);
+        offline_time1 = offline_time1 + getMillies(t_start, t_end);
 
-            gettimeofday(&t_end, NULL);
-            offline_time1 = offline_time1 + getMillies(t_start, t_end);
-        }
+        gettimeofday(&t_start, NULL);
+        encrypted_neighbors_nodex_graph2 =  get_encrypted_neighbors( &encryption_memory2, nodex, graph2, with_memory,group,
+                                                                    base, beta, ctx);
+
+        encrypted_neighbors_nodey_graph2 =  get_encrypted_neighbors( &encryption_memory2, nodey, graph2, with_memory,group,
+                                                                    base, beta, ctx);
 
 
-        if(memory_1.find(nodey) != memory_1.end() && with_memory)
-        {
-            gettimeofday(&t_start, NULL);
-            encrypted_neighbors_nodey_graph1 = memory_1.at(nodey);
-            gettimeofday(&t_end, NULL);
-            online_time1 = online_time1 + getMillies(t_start, t_end);
-
-        }
-        else
-        {
-
-            gettimeofday(&t_start, NULL);
-            vector<uint32_t> neighbors_nodey_graph1 = neighbors(graph1, nodey);
-
-            //g^bi^alpha
-            for(int i = 0; i < neighbors_nodey_graph1.size(); i++)
-            {
-                tmp = EC_POINT_new(group);
-                BN_set_word(neighbor, neighbors_nodey_graph1.at(i));
-                EC_POINT_mul(group, tmp, NULL, base, neighbor, ctx);
-                EC_POINT_mul(group, tmp, NULL, tmp, alpha, ctx);
-                encrypted_neighbors_nodey_graph1.push_back(tmp);
-            }
-
-            memory_1.insert({nodey, encrypted_neighbors_nodey_graph1});
-
-            gettimeofday(&t_end, NULL);
-            offline_time1 = offline_time1 + getMillies(t_start, t_end);
-
-        }
-
-
-        if(memory_2.find(nodex) != memory_2.end() && with_memory)
-        {
-            gettimeofday(&t_start, NULL);
-            encrypted_neighbors_nodex_graph2 = memory_2.at(nodex);
-            gettimeofday(&t_end, NULL);
-
-            online_time2 = online_time2 + getMillies(t_start, t_end);
-        }
-        else
-        {
-            gettimeofday(&t_start, NULL);
-            vector<uint32_t> neighbors_nodex_graph2 = neighbors(graph2, nodex);
-
-            //g^ci^beta
-            for(int i = 0; i < neighbors_nodex_graph2.size(); i++)
-            {
-                tmp = EC_POINT_new(group);
-                BN_set_word(neighbor, neighbors_nodex_graph2.at(i));
-                EC_POINT_mul(group, tmp, NULL, base, neighbor, ctx);
-                EC_POINT_mul(group, tmp, NULL, tmp, beta, ctx);
-                encrypted_neighbors_nodex_graph2.push_back(tmp);
-            }
-
-            memory_2.insert({nodex, encrypted_neighbors_nodex_graph2});
-
-            gettimeofday(&t_end, NULL);
-            offline_time2 = offline_time2 + getMillies(t_start, t_end);
-        }
-
-
-        if(memory_2.find(nodey) != memory_2.end() && with_memory)
-        {
-            gettimeofday(&t_start, NULL);
-            encrypted_neighbors_nodey_graph2 = memory_2.at(nodey);
-            gettimeofday(&t_end, NULL);
-            online_time2 = online_time2 + getMillies(t_start, t_end);
-        }
-        else
-        {
-            gettimeofday(&t_start, NULL);
-            vector<uint32_t> neighbors_nodey_graph2 = neighbors(graph2, nodey);
-
-            //g^di*beta
-            for(int i = 0; i < neighbors_nodey_graph2.size(); i++)
-            {
-                tmp = EC_POINT_new(group);
-                BN_set_word(neighbor, neighbors_nodey_graph2.at(i));
-                EC_POINT_mul(group, tmp, NULL, base, neighbor, ctx);
-                EC_POINT_mul(group, tmp, NULL, tmp, beta, ctx);
-                encrypted_neighbors_nodey_graph2.push_back(tmp);
-            }
-
-            memory_2.insert({nodey, encrypted_neighbors_nodey_graph2});
-
-            gettimeofday(&t_end, NULL);
-            offline_time2 = offline_time2 + getMillies(t_start, t_end);
-        }
+        gettimeofday(&t_end, NULL);
+        offline_time2 = offline_time2 + getMillies(t_start, t_end);
 
 
         gettimeofday(&t_start, NULL);
 
+        size_t size_of_ai = size_of_vector(encrypted_neighbors_nodex_graph1, group, ctx);
+        size_t size_of_bi =  size_of_vector(encrypted_neighbors_nodey_graph1, group, ctx);
+        size_t size_of_ci = size_of_vector(encrypted_neighbors_nodex_graph2, group, ctx);
+        size_t size_of_di = size_of_vector(encrypted_neighbors_nodey_graph2, group, ctx);
+
+//        cout << "Sizes have been computed" << endl;
+
 
         //g^ai*alpha*beta
+#pragma omp parallel for
         for(int i = 0; i < encrypted_neighbors_nodex_graph1.size(); i++)
         {
             EC_POINT_mul(group, encrypted_neighbors_nodex_graph1.at(i), NULL, encrypted_neighbors_nodex_graph1.at(i), beta, ctx);
         }
 
+        size_t size_of_ai_prime = size_of_vector(encrypted_neighbors_nodex_graph1, group, ctx);
+
         //g^bi*alpha*beta
+#pragma omp parallel for
         for(int i = 0; i < encrypted_neighbors_nodey_graph1.size(); i++)
         {
             EC_POINT_mul(group, encrypted_neighbors_nodey_graph1.at(i), NULL, encrypted_neighbors_nodey_graph1.at(i), beta, ctx);
         }
+
+        size_t size_of_bi_prime = size_of_vector(encrypted_neighbors_nodey_graph1, group, ctx);
+
 
         gettimeofday(&t_end, NULL);
         online_time2 = online_time2 + getMillies(t_start, t_end);
@@ -279,16 +218,22 @@ vector<UndirectedEdge> graph2, string metric, bool with_memory)
         gettimeofday(&t_start, NULL);
 
         //g^(ci*beta*alpha)
+#pragma omp parallel for
         for(int i = 0; i < encrypted_neighbors_nodex_graph2.size(); i++)
         {
             EC_POINT_mul(group, encrypted_neighbors_nodex_graph2.at(i), NULL, encrypted_neighbors_nodex_graph2.at(i), alpha, ctx);
         }
 
+
         //g^(di*beta*alpha)
+#pragma omp parallel for
         for(int i = 0; i < encrypted_neighbors_nodey_graph2.size(); i++)
         {
             EC_POINT_mul(group, encrypted_neighbors_nodey_graph2.at(i), NULL, encrypted_neighbors_nodey_graph2.at(i), alpha, ctx);
         }
+
+//        cout << "Size of di-s : " << size_of_vector(encrypted_neighbors_nodey_graph2, group, ctx) << endl;
+
 
         gettimeofday(&t_end, NULL);
         online_time1 = online_time1 + getMillies(t_start, t_end);
@@ -296,8 +241,10 @@ vector<UndirectedEdge> graph2, string metric, bool with_memory)
         gettimeofday(&t_start, NULL);
 
         vector<EC_POINT*> neighbors_nodex = union_of_vectors(encrypted_neighbors_nodex_graph1, encrypted_neighbors_nodex_graph2, group, ctx);
+//        cout << "Size of union1 : " << neighbors_nodex.size() << endl;
 
         vector<EC_POINT*> neighbors_nodey = union_of_vectors(encrypted_neighbors_nodey_graph1, encrypted_neighbors_nodey_graph2, group, ctx);
+//        cout << "Size of union2 : " << neighbors_nodey.size() << endl;
 
         gettimeofday(&t_end, NULL);
         double duration = getMillies(t_start, t_end);
@@ -313,22 +260,47 @@ vector<UndirectedEdge> graph2, string metric, bool with_memory)
 
 
         cout << "Size of intersection : " << common_neighbors.size() << endl;
+//
+//        cout << "Offline time graph1 : " << std::setprecision(5)
+//             << offline_time1 << " ms" << '\n';
+//        cout << "Offline time graph2 : " << std::setprecision(5)
+//             << offline_time2 << " ms" << '\n';
+//        cout << "Online time graph1 : " << std::setprecision(5)
+//             << online_time1 << " ms" << '\n';
+//        cout << "Online time graph2 : " << std::setprecision(5)
+//             << online_time2 << " ms" << '\n';
+//        cout << "Union time : " << std::setprecision(5)
+//             << union_time << " ms" << '\n';
+//        cout << "Intersection time : " << std::setprecision(5)
+//             << intersection_time << " ms" << '\n';
+//
+//        cout << "Size of ai : "<< size_of_ai << endl;
+//        cout << "Size of bi : "<< size_of_bi << endl;
+//        cout << "Size of ai-prime : "<< size_of_ai_prime << endl;
+//        cout << "Size of bi-prime : "<< size_of_bi_prime << endl;
+//        cout << "Size of ci : "<< size_of_ci << endl;
+//        cout << "Size of di : " << size_of_ci << endl;
 
-        cout << "Offline time graph1 : " << std::setprecision(5)
-             << offline_time1 << " ms" << '\n';
-        cout << "Offline time graph2 : " << std::setprecision(5)
-             << offline_time2 << " ms" << '\n';
-        cout << "Online time graph1 : " << std::setprecision(5)
-             << online_time1 << " ms" << '\n';
-        cout << "Online time graph2 : " << std::setprecision(5)
-             << online_time2 << " ms" << '\n';
-        cout << "Union time : " << std::setprecision(5)
-             << union_time << " ms" << '\n';
-        cout << "Intersection time : " << std::setprecision(5)
-             << intersection_time << " ms" << '\n';
+//        logs << "offline_time1,online_time1,offline_time2,online_time2,union_time,intersection_time,ai,bi,ai_prime,bi_prime,ci,di\n";
+
+        logs << nodex << "," << nodey <<","
+            << offline_time1 << ","
+            << online_time1 << ","
+            << offline_time2 << ","
+            << online_time2 << ","
+            << union_time << ","
+            << intersection_time << ","
+            << size_of_ai << ","
+            << size_of_bi << ","
+            << size_of_ai_prime << ","
+            << size_of_bi_prime << ","
+            << size_of_ci << ","
+            << size_of_di << ","
+            << common_neighbors.size() << "\n";
+
+
 
     }
-
 
     BN_free(neighbor);
     BN_CTX_free(ctx);
@@ -340,8 +312,57 @@ vector<UndirectedEdge> graph2, string metric, bool with_memory)
     EVP_cleanup();
     ERR_free_strings();
 
+
+    //close logs
+    logs.close();
+
 }
 
+vector<EC_POINT*> get_encrypted_neighbors(unordered_map<uint32_t, EC_POINT*> *encryption_memory,
+                                          uint32_t node, unordered_map<uint32_t, vector<uint32_t>> graph, bool with_memory,
+                                          EC_GROUP* group, EC_POINT* base, BIGNUM *expo, BN_CTX *ctx)
+{
+
+    vector<uint32_t> clear_neighbors;
+    vector<EC_POINT*> encrypted_neighbors;
+    EC_POINT *tmp;
+    BIGNUM *neighbor;
+
+
+    if(graph.find(node) != graph.end())
+    {
+
+        clear_neighbors = graph.at(node);
+
+        for(uint32_t clear_node: clear_neighbors)
+        {
+            if (encryption_memory->find(clear_node) != encryption_memory->end() && with_memory){
+
+                tmp = EC_POINT_dup(encryption_memory->at(clear_node), group);
+            }
+            else{
+                tmp = EC_POINT_new(group);
+                neighbor = BN_new();
+                BN_set_word(neighbor, clear_node);
+                EC_POINT_mul(group, tmp, NULL, base, neighbor, ctx);
+                EC_POINT_mul(group, tmp, NULL, tmp, expo, ctx);
+                if(with_memory)
+                    encryption_memory->insert({clear_node, EC_POINT_dup(tmp, group)});
+            }
+
+            encrypted_neighbors.push_back(tmp);
+//            encrypted_neighbors.push_back(EC_POINT_dup(encryption_memory->at(clear_node), group));
+        }
+    }
+    else
+    {
+        vector<uint32_t> neighbors;
+        graph.insert({node, neighbors});
+
+    }
+
+    return encrypted_neighbors;
+}
 
 //float compute_similarity_score(vector<mpz_class> encrypted_neighbors_nodex_1,
 //                              vector<mpz_class>  encrypted_neighbors_nodex_2,
