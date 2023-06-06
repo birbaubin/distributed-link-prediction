@@ -11,7 +11,7 @@ def convert_ms_to_hms(milliseconds):
 
 
 PROJET_PATH = "/Users/aubinbirba/Works/optimized-distributed-link-prediction/distributed-link-prediction/logs/"
-DATASET_NAME="ecc-acm.csv"
+DATASET_NAME="ecc-email.csv"
 results = pd.read_csv(PROJET_PATH+DATASET_NAME)
 
 times = ["offline_time1", "offline_time2", "online_time1", "online_time2"]

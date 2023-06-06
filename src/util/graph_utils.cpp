@@ -2,13 +2,13 @@
 #include <iostream>
 #include <set>
 #include <random>
+#include <algorithm>
 
 
 
 using namespace std;
 vector<uint32_t> neighbors(vector<UndirectedEdge> graph,  uint32_t node)
 {
-    int number_of_neighgors = 0;
     vector<uint32_t> node_neighbors;
  
     for (size_t i = 0; i < graph.size() ; i++)

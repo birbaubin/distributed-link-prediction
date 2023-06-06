@@ -27,7 +27,7 @@ void print_ec_point(const EC_GROUP *group, const EC_POINT *point) {
 int main() {
 
     int number_of_selected_nodes = 142;
-    string dataset_name = "flickr.csv";
+    string dataset_name = "email.csv";
 
     string network1_name = "datasets/net1-"+dataset_name;
     string network2_name = "datasets/net2-"+dataset_name;

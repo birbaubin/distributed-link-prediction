@@ -121,6 +121,10 @@ void run_new_protocol_inline(vector<UndirectedEdge> evaluated_edges, unordered_m
 
     alpha = BN_new();
     beta = BN_new();
+    BIGNUM* zero = BN_new();
+    BN_set_word(zero, 0);
+
+
     tmp = EC_POINT_new(group);
 
     BN_rand_range(alpha, modulo);
@@ -160,6 +164,8 @@ void run_new_protocol_inline(vector<UndirectedEdge> evaluated_edges, unordered_m
         vector<EC_POINT*> encrypted_neighbors_nodex_graph2;
         vector<EC_POINT*> encrypted_neighbors_nodey_graph2;
 
+        vector<EC_POINT*> ai_prime;
+
 
         gettimeofday(&t_start, NULL);
         encrypted_neighbors_nodex_graph1 =  get_encrypted_neighbors( &encryption_memory1, nodex, graph1, with_memory,group,
@@ -192,9 +198,32 @@ void run_new_protocol_inline(vector<UndirectedEdge> evaluated_edges, unordered_m
 
 //        cout << "Sizes have been computed" << endl;
 
+#pragma omp parallel
+        {
+            vector<EC_POINT*> local_vector;
+            EC_POINT* local_point;
+
+#pragma omp parallel for
+            for (int i=0 ; i< encrypted_neighbors_nodex_graph1.size(); ++i ) {
+                local_point = EC_POINT_new(group);
+                EC_POINT_mul(group, local_point, beta, local_point, beta, ctx);
+                local_vector.push_back(local_point);
+
+            }
+#pragma omp critical
+            {
+                for(int i=0; i<local_vector.size(); ++i) {
+                    ai_prime.push_back(local_vector.at(i));
+                }
+            }
+        }
+
+
+
+
 
         //g^ai*alpha*beta
-#pragma omp parallel for
+//#pragma omp parallel for
         for(int i = 0; i < encrypted_neighbors_nodex_graph1.size(); i++)
         {
             EC_POINT_mul(group, encrypted_neighbors_nodex_graph1.at(i), NULL, encrypted_neighbors_nodex_graph1.at(i), beta, ctx);
@@ -203,7 +232,7 @@ void run_new_protocol_inline(vector<UndirectedEdge> evaluated_edges, unordered_m
         size_t size_of_ai_prime = size_of_vector(encrypted_neighbors_nodex_graph1, group, ctx);
 
         //g^bi*alpha*beta
-#pragma omp parallel for
+//#pragma omp parallel for
         for(int i = 0; i < encrypted_neighbors_nodey_graph1.size(); i++)
         {
             EC_POINT_mul(group, encrypted_neighbors_nodey_graph1.at(i), NULL, encrypted_neighbors_nodey_graph1.at(i), beta, ctx);
@@ -218,7 +247,7 @@ void run_new_protocol_inline(vector<UndirectedEdge> evaluated_edges, unordered_m
         gettimeofday(&t_start, NULL);
 
         //g^(ci*beta*alpha)
-#pragma omp parallel for
+//#pragma omp parallel for
         for(int i = 0; i < encrypted_neighbors_nodex_graph2.size(); i++)
         {
             EC_POINT_mul(group, encrypted_neighbors_nodex_graph2.at(i), NULL, encrypted_neighbors_nodex_graph2.at(i), alpha, ctx);
@@ -226,7 +255,7 @@ void run_new_protocol_inline(vector<UndirectedEdge> evaluated_edges, unordered_m
 
 
         //g^(di*beta*alpha)
-#pragma omp parallel for
+//#pragma omp parallel for
         for(int i = 0; i < encrypted_neighbors_nodey_graph2.size(); i++)
         {
             EC_POINT_mul(group, encrypted_neighbors_nodey_graph2.at(i), NULL, encrypted_neighbors_nodey_graph2.at(i), alpha, ctx);
@@ -297,6 +326,8 @@ void run_new_protocol_inline(vector<UndirectedEdge> evaluated_edges, unordered_m
             << size_of_ci << ","
             << size_of_di << ","
             << common_neighbors.size() << "\n";
+
+
 
 
 

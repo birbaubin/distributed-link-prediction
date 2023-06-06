@@ -3,7 +3,7 @@
 using namespace std;
 
 
-int multi_link_experiment()
+int complete_graph_experiment()
 {
 
 	const int symsecbits = 80;
