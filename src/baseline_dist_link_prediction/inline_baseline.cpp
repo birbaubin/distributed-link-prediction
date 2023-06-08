@@ -6,10 +6,6 @@ void run_baseline_protocol_inline(vector<UndirectedEdge> evaluated_edges, unorde
 
    cout << "******************************* Baseline protocol *******************************" << endl;
 
-#ifdef DEBUG_TIME
-    timeval t_protocol_start, t_start, t_end;
-    gettimeofday(&t_protocol_start, NULL);
-#endif
 
     ofstream logs("logs/gmp-baseline-"+dataset_name);
     logs << "nodex,nodey,offline_time1,online_time1,offline_time2,online_time2,ai,ai_prime,ts,score\n";
@@ -17,7 +13,7 @@ void run_baseline_protocol_inline(vector<UndirectedEdge> evaluated_edges, unorde
     for (size_t i = 0; i < evaluated_edges.size(); i++)
     {
 
-#ifdef DEBUG_TIME
+
         timeval t_start, t_end;
         gettimeofday(&t_start, NULL);
         double offline_time1 = 0;
@@ -27,8 +23,6 @@ void run_baseline_protocol_inline(vector<UndirectedEdge> evaluated_edges, unorde
         size_t size_of_ai = 0;
         size_t size_of_ai_prime = 0;
         size_t size_of_ts = 0;
-
-#endif
 
         //get current nodes from to evaluate in this iteration 
         uint32_t nodex = evaluated_edges.at(i).vertices[0];
@@ -69,14 +63,18 @@ void run_baseline_protocol_inline(vector<UndirectedEdge> evaluated_edges, unorde
 
         int score = local1.size() + local2.size() + cross2 + cross1 - overlap;
 
-//        cout << "Offline time1 " << offline_time1 << endl;
-//        cout << "Offline time2 " << offline_time2 << endl;
-//        cout << "Online time1 " << online_time1 << endl;
-//        cout << "Online time2 " << online_time2 << endl;
-//
-//        cout << "ai " << size_of_ai << endl;
-//        cout << "ai_prime " << size_of_ai_prime << endl;
-//        cout << "ts " << size_of_ts << endl;
+#ifdef DEBUG
+        cout << "Offline time1 " << offline_time1 << endl;
+        cout << "Offline time2 " << offline_time2 << endl;
+        cout << "Online time1 " << online_time1 << endl;
+        cout << "Online time2 " << online_time2 << endl;
+
+        cout << "ai " << size_of_ai << endl;
+        cout << "ai_prime " << size_of_ai_prime << endl;
+        cout << "ts " << size_of_ts << endl;
+
+#endif
+
 
         logs << nodex << "," << nodey <<","
              << offline_time1 << ","
