@@ -25,7 +25,7 @@ int main(int argc, char** argv)
 //
 //    vector<uint32_t> selected_nodes = get_nodes_of_graph(graph1);
 ////
-    vector<uint32_t> selected_nodes = {3, 4, 5};
+    vector<uint32_t> selected_nodes = {9, 11};
 //
     vector<UndirectedEdge> evaluated_graph = generate_complete_graph(selected_nodes);
 //

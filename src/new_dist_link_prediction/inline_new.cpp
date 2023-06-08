@@ -98,7 +98,8 @@ void run_new_protocol_inline(vector<UndirectedEdge> evaluated_edges, unordered_m
 
 
     unordered_map<uint32_t, mpz_class > self_encryption_memory_1, self_encryption_memory_2;
-    unordered_map<uint32_t, vector<mpz_class> > , partner_encryption_memory_2;
+    unordered_map<uint32_t, vector<mpz_class> > final_encryptions_1, final_encryptions_2;
+
     vector<uint32_t> treated_nodes;
 
 
@@ -124,6 +125,10 @@ void run_new_protocol_inline(vector<UndirectedEdge> evaluated_edges, unordered_m
         uint32_t nodex = evaluated_edges.at(i).vertices[0];
         uint32_t nodey = evaluated_edges.at(i).vertices[1];
 
+        bool nodex_already_treated = find(treated_nodes.begin(), treated_nodes.end(), nodex) != treated_nodes.end();
+        bool nodey_already_treated = find(treated_nodes.begin(), treated_nodes.end(), nodey) != treated_nodes.end();
+
+
         cout << "--- New link prediction for nodes " << nodex << " and node " << nodey << " ---" << endl;
 
         vector<mpz_class> encrypted_neighbors_nodex_1;
@@ -133,105 +138,119 @@ void run_new_protocol_inline(vector<UndirectedEdge> evaluated_edges, unordered_m
 
         size_t size_of_ai;
         size_t size_of_bi;
+        size_t size_of_ai_prime;
+        size_t size_of_bi_prime;
         size_t size_of_ci;
         size_t size_of_di;
-
 
         mpz_t tmp;
         mpz_init(tmp);
 
         int total_number_encryptions = 0;
 
-
         gettimeofday(&t_start, NULL);
 
-        encrypted_neighbors_nodex_1 = get_encrypted_neighbors(&self_encryption_memory_1, nodex, graph1, with_memory, alpha, p);
 
-        encrypted_neighbors_nodey_1 = get_encrypted_neighbors(&self_encryption_memory_1, nodey, graph1, with_memory, alpha, p);
+        if(! nodex_already_treated)
+            encrypted_neighbors_nodex_1 = get_encrypted_neighbors(&self_encryption_memory_1, nodex, graph1, with_memory, alpha, p);
+        else encrypted_neighbors_nodex_1 = final_encryptions_1.at(nodex);
+
+        if(! nodey_already_treated)
+            encrypted_neighbors_nodey_1 = get_encrypted_neighbors(&self_encryption_memory_1, nodey, graph1, with_memory, alpha, p);
+        else encrypted_neighbors_nodey_1 = final_encryptions_1.at(nodey);
 
         gettimeofday(&t_end, NULL);
         offline_time1 = offline_time1 + getMillies(t_start, t_end);
 
 
         gettimeofday(&t_start, NULL);
-        encrypted_neighbors_nodex_2 = get_encrypted_neighbors(&self_encryption_memory_2, nodex, graph2, with_memory, beta, p);
+        if(! nodex_already_treated)
+            encrypted_neighbors_nodex_2 = get_encrypted_neighbors(&self_encryption_memory_2, nodex, graph2, with_memory, beta, p);
+        else encrypted_neighbors_nodex_2 = final_encryptions_2.at(nodex);
 
-        encrypted_neighbors_nodey_2 = get_encrypted_neighbors(&self_encryption_memory_2, nodey, graph2, with_memory, beta, p);
+        if(! nodey_already_treated)
+            encrypted_neighbors_nodey_2 = get_encrypted_neighbors(&self_encryption_memory_2, nodey, graph2, with_memory, beta, p);
+        else encrypted_neighbors_nodey_2 = final_encryptions_2.at(nodey);
+
         gettimeofday(&t_end, NULL);
         offline_time2 = offline_time2 + getMillies(t_start, t_end);
 
         gettimeofday(&t_start, NULL);
 
 
-        if(std::find(treated_nodes.begin(), treated_nodes.end(), nodex) != treated_nodes.end())
+        if(nodex_already_treated)
         {
             size_of_ai = 0;
             size_of_ci = 0;
+            size_of_ai_prime = 0;
         }
         else{
             size_of_ai = size_of_vector(encrypted_neighbors_nodex_1);
             size_of_ci = size_of_vector(encrypted_neighbors_nodex_2);
 
+            for (size_t i = 0; i < encrypted_neighbors_nodex_1.size(); i++)
+            {
+
+                mpz_powm(encrypted_neighbors_nodex_1.at(i).get_mpz_t(),
+                         encrypted_neighbors_nodex_1.at(i).get_mpz_t(),
+                         beta, p);
+
+            }
+
+            size_of_ai_prime = size_of_vector(encrypted_neighbors_nodex_1);
+
+
         }
 
-        if(std::find(treated_nodes.begin(), treated_nodes.end(), nodey) != treated_nodes.end())
+        if(nodey_already_treated)
         {
             size_of_bi = 0;
             size_of_di = 0;
+            size_of_bi_prime = 0;
         }
         else{
             size_of_bi =  size_of_vector(encrypted_neighbors_nodey_1);
             size_of_di = size_of_vector(encrypted_neighbors_nodey_2);
+
+            for (size_t i = 0; i < encrypted_neighbors_nodey_1.size(); i++)
+            {
+                mpz_powm(encrypted_neighbors_nodey_1.at(i).get_mpz_t(),
+                         encrypted_neighbors_nodey_1.at(i).get_mpz_t(),
+                         beta, p);
+                total_number_encryptions++;
+            }
+
+            size_of_bi_prime = size_of_vector(encrypted_neighbors_nodey_1);
         }
 
-
-        for (size_t i = 0; i < encrypted_neighbors_nodex_1.size(); i++)
-        {
-
-            mpz_powm(encrypted_neighbors_nodex_1.at(i).get_mpz_t(),
-                     encrypted_neighbors_nodex_1.at(i).get_mpz_t(),
-                     beta, p);
-
-            total_number_encryptions++;
-        }
-
-        size_t size_of_ai_prime = size_of_vector(encrypted_neighbors_nodex_1);
-
-
-        for (size_t i = 0; i < encrypted_neighbors_nodey_1.size(); i++)
-        {
-            mpz_powm(encrypted_neighbors_nodey_1.at(i).get_mpz_t(),
-                     encrypted_neighbors_nodey_1.at(i).get_mpz_t(),
-                     beta, p);
-            total_number_encryptions++;
-        }
-
-        size_t size_of_bi_prime = size_of_vector(encrypted_neighbors_nodey_1);
 
         gettimeofday(&t_end, NULL);
         online_time2 = online_time2 + getMillies(t_start, t_end);
 
         gettimeofday(&t_start, NULL);
 
-
-        for (size_t i = 0; i < encrypted_neighbors_nodex_2.size(); i++)
+        if(! nodex_already_treated)
         {
+            for (size_t i = 0; i < encrypted_neighbors_nodex_2.size(); i++)
+            {
 
-            mpz_powm(encrypted_neighbors_nodex_2.at(i).get_mpz_t(),
-                    encrypted_neighbors_nodex_2.at(i).get_mpz_t(),
-                    alpha, p);
-            total_number_encryptions++;
+                mpz_powm(encrypted_neighbors_nodex_2.at(i).get_mpz_t(),
+                         encrypted_neighbors_nodex_2.at(i).get_mpz_t(),
+                         alpha, p);
+                total_number_encryptions++;
+            }
         }
 
-
-        for (size_t i = 0; i < encrypted_neighbors_nodey_2.size(); i++)
+        if(! nodey_already_treated)
         {
-            mpz_powm(encrypted_neighbors_nodey_2.at(i).get_mpz_t(),
-                    encrypted_neighbors_nodey_2.at(i).get_mpz_t(),
-                    alpha, p);
-            total_number_encryptions++;
+            for (size_t i = 0; i < encrypted_neighbors_nodey_2.size(); i++)
+            {
+                mpz_powm(encrypted_neighbors_nodey_2.at(i).get_mpz_t(),
+                         encrypted_neighbors_nodey_2.at(i).get_mpz_t(),
+                         alpha, p);
+                total_number_encryptions++;
+            }
         }
-
 
 
         float score = compute_similarity_score(encrypted_neighbors_nodex_1, encrypted_neighbors_nodex_2, encrypted_neighbors_nodey_1, encrypted_neighbors_nodey_2, metric);
@@ -280,6 +299,11 @@ void run_new_protocol_inline(vector<UndirectedEdge> evaluated_edges, unordered_m
 
         treated_nodes.push_back(nodex);
         treated_nodes.push_back(nodey);
+
+        final_encryptions_1.insert({nodex, encrypted_neighbors_nodex_1});
+        final_encryptions_1.insert({nodey, encrypted_neighbors_nodey_1});
+        final_encryptions_2.insert({nodex, encrypted_neighbors_nodex_2});
+        final_encryptions_2.insert({nodey, encrypted_neighbors_nodey_2});
     }
 
     logs.close();
