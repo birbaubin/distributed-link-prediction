@@ -22,7 +22,9 @@ void run_new_protocol_inline(vector<UndirectedEdge> evaluated_edges, unordered_m
                              unordered_map<uint32_t, vector<uint32_t> > graph2, pk_crypto* field, string metric, bool with_memory, string dataset_name);
 
 void run_clear_protocol(vector<UndirectedEdge> evaluated_edges,  unordered_map<uint32_t, vector<uint32_t> > graph1,
-                        unordered_map<uint32_t, vector<uint32_t> > graph2, string metric);
+                        unordered_map<uint32_t, vector<uint32_t> > graph2, string metric, string dataset_name);
+
+void run_local_protocol(vector<UndirectedEdge> evaluated_edges,  unordered_map<uint32_t, vector<uint32_t> > graph, string metric, string dataset_name);
 
 float compute_similarity_score(vector<mpz_class> encrypted_neighbors_nodex_1,
                                vector<mpz_class>  encrypted_neighbors_nodex_2,

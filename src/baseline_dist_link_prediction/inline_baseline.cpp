@@ -61,25 +61,22 @@ void run_baseline_protocol_inline(vector<UndirectedEdge> evaluated_edges, unorde
 
         uint32_t cross1 = psi_ca(neighbors_nodex_1, neighbors_nodey_2, (prime_field*)field, "crossover 1",
                                  &online_time1, &online_time2, &offline_time1, &offline_time2, &size_of_ai, &size_of_ai_prime, &size_of_ts);
-        cout << "First PSI " << endl;
         uint32_t cross2 = psi_ca(neighbors_nodey_1, neighbors_nodex_2, (prime_field*)field, "crossover 2",
                                  &online_time1, &online_time2, &offline_time1, &offline_time2, &size_of_ai, &size_of_ai_prime, &size_of_ts);
-        cout << "Second PSI " << endl;
         uint32_t overlap = psi_ca(local1, local2, (prime_field*)field, "overlap",
                                   &online_time1, &online_time2, &offline_time1, &offline_time2, &size_of_ai, &size_of_ai_prime, &size_of_ts);
-        cout << "Third PSI " << endl;
 
 
         int score = local1.size() + local2.size() + cross2 + cross1 - overlap;
 
-        cout << "Offline time1 " << offline_time1 << endl;
-        cout << "Offline time2 " << offline_time2 << endl;
-        cout << "Online time1 " << online_time1 << endl;
-        cout << "Online time2 " << online_time2 << endl;
-
-        cout << "ai " << size_of_ai << endl;
-        cout << "ai_prime " << size_of_ai_prime << endl;
-        cout << "ts " << size_of_ts << endl;
+//        cout << "Offline time1 " << offline_time1 << endl;
+//        cout << "Offline time2 " << offline_time2 << endl;
+//        cout << "Online time1 " << online_time1 << endl;
+//        cout << "Online time2 " << online_time2 << endl;
+//
+//        cout << "ai " << size_of_ai << endl;
+//        cout << "ai_prime " << size_of_ai_prime << endl;
+//        cout << "ts " << size_of_ts << endl;
 
         logs << nodex << "," << nodey <<","
              << offline_time1 << ","
@@ -92,22 +89,22 @@ void run_baseline_protocol_inline(vector<UndirectedEdge> evaluated_edges, unorde
              << score << "\n";
 
 
-    cout << "--- Results ---" << endl;
-    cout << "Score  : " <<  score << endl;
+//    cout << "--- Results ---" << endl;
+//    cout << "Score  : " <<  score << endl;
 
-#ifdef DEBUG_TIME
-    gettimeofday(&t_end, NULL);    
-    cout << "Time : " << std::setprecision(5) << getMillies(t_start, t_end) << " ms" << '\n';
-    
-#endif
+//#ifdef DEBUG_TIME
+//    gettimeofday(&t_end, NULL);
+//    cout << "Time : " << std::setprecision(5) << getMillies(t_start, t_end) << " ms" << '\n';
+//
+//#endif
 
     }
 
-    #ifdef DEBUG_TIME
-    gettimeofday(&t_end, NULL);
-    cout << "Time for all baseline predictions : " << std::setprecision(5)
-                         << getMillies(t_protocol_start, t_end) << " ms" << '\n';
-    #endif
+//    #ifdef DEBUG_TIME
+//    gettimeofday(&t_end, NULL);
+//    cout << "Time for all baseline predictions : " << std::setprecision(5)
+//                         << getMillies(t_protocol_start, t_end) << " ms" << '\n';
+//    #endif
 
 }
 
