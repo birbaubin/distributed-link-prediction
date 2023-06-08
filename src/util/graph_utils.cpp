@@ -1,7 +1,5 @@
 #include "graph_utils.h"
-#include <iostream>
-#include <set>
-#include <random>
+
 
 
 
@@ -109,6 +107,22 @@ vector<uint32_t> select_random_node(vector<UndirectedEdge> graph, int number_of_
     std::sample(nodes.begin(), nodes.end(), std::back_inserter(result),
                 number_of_nodes, std::mt19937{std::random_device{}()});
 
+    return result;
+
+}
+
+vector<uint32_t> get_nodes_of_graph(unordered_map<uint32_t, vector<uint32_t > > graph)
+{
+    std::set<uint32_t> nodes;
+    for (auto kv: graph)
+    {
+        nodes.insert(kv.first);
+        vector<uint32_t> neighbors = kv.second;
+        for(uint32_t neighbor: neighbors)
+            nodes.insert(neighbor);
+    }
+
+    vector<uint32_t> result(nodes.begin(), nodes.end());
     return result;
 
 }

@@ -1,7 +1,7 @@
 #include "baseline_protocol.h"
 
-void run_baseline_protocol_inline2(vector<UndirectedEdge> evaluated_edges, vector<UndirectedEdge> graph1, 
-                            vector<UndirectedEdge> graph2, pk_crypto* field)
+void run_baseline_protocol_inline2(vector<UndirectedEdge> evaluated_edges, unordered_map<uint32_t, vector<uint32_t> > graph1,
+                                  unordered_map<uint32_t, vector<uint32_t> > graph2, pk_crypto* field)
 {
 
     cout << "******************************* Baseline protocol *******************************" << endl;
@@ -17,22 +17,27 @@ void run_baseline_protocol_inline2(vector<UndirectedEdge> evaluated_edges, vecto
 
         gettimeofday(&t_start, NULL);
 
-        //get current nodes from to evaluate in this iteration 
+        //get current nodes from to evaluate in this iteration
         uint32_t nodex = evaluated_edges.at(i).vertices[0];
         uint32_t nodey = evaluated_edges.at(i).vertices[1];
 
         cout << "--- Baseline link prediction for nodes " << nodex << " and node " << nodey << " ---" << endl;
-    
+
         int total_number_encryptions = 0;
         int n_encryptions_cross1 = 0;
         int n_encryptions_cross2 = 0;
         int n_encryptions_over = 0;
 
-        //get neighbors of nodes we are doing prediction on 
-        vector<uint32_t> neighbors_nodex_1 = neighbors(graph1, nodex);
-        vector<uint32_t> neighbors_nodey_1 = neighbors(graph1, nodey);
-        vector<uint32_t> neighbors_nodex_2 = neighbors(graph2, nodex);
-        vector<uint32_t> neighbors_nodey_2 = neighbors(graph2, nodey);
+        //get neighbors of nodes we are doing prediction on
+        vector<uint32_t> neighbors_nodex_1;
+        vector<uint32_t> neighbors_nodey_1;
+        vector<uint32_t> neighbors_nodex_2;
+        vector<uint32_t> neighbors_nodey_2;
+
+        if (graph1.find(nodex) != graph1.end()) neighbors_nodex_1 = graph1.at(nodex);
+        if (graph1.find(nodey) != graph1.end()) neighbors_nodey_1 = graph1.at(nodey);
+        if (graph2.find(nodex) != graph1.end()) neighbors_nodex_2 = graph2.at(nodex);
+        if (graph2.find(nodey) != graph1.end()) neighbors_nodey_2 = graph2.at(nodey);
 
         // Compute local1 and local2
         vector<uint32_t> local1 = int_intersection(neighbors_nodex_1, neighbors_nodey_1);
@@ -41,7 +46,7 @@ void run_baseline_protocol_inline2(vector<UndirectedEdge> evaluated_edges, vecto
         #ifndef DEBUG_TIME
             cout << "Size of local1 = " << localx.size() << endl;
             cout << "Size of local2 = " << localy.size() << endl;
-        #endif 
+        #endif
 
         //remove local1 and local2 before PSI
         neighbors_nodex_1 = remove_vector(neighbors_nodex_1, local1);
@@ -54,12 +59,12 @@ void run_baseline_protocol_inline2(vector<UndirectedEdge> evaluated_edges, vecto
         int size_neighbors_nodex_2 = neighbors_nodex_2.size();
         int size_neighbors_nodey_2 = neighbors_nodey_2.size();
 
-        uint32_t cross1 = psi_ca(neighbors_nodex_1, neighbors_nodey_2, (prime_field*)field, "crossover 1", &n_encryptions_cross1);
-        uint32_t cross2 = psi_ca(neighbors_nodey_1, neighbors_nodex_2, (prime_field*)field, "crossover 2", &n_encryptions_cross2);
-        uint32_t overlap = psi_ca(local1, local2, (prime_field*)field, "overlap", &n_encryptions_over);
+        uint32_t cross1 = psi_ca2(neighbors_nodex_1, neighbors_nodey_2, (prime_field*)field, "crossover 1", &n_encryptions_cross1);
+        uint32_t cross2 = psi_ca2(neighbors_nodey_1, neighbors_nodex_2, (prime_field*)field, "crossover 2", &n_encryptions_cross2);
+        uint32_t overlap = psi_ca2(local1, local2, (prime_field*)field, "overlap", &n_encryptions_over);
 
     // double data_x = getKBsFromMpz(x_neighbors_node1.size()) + getKBsFromMpz(x_neighbors_node2.size()) + getKBsFromMpz(localx.size());
-    // double data_y = getKBsFromMpz(y_neighbors_node1.size()) + getKBsFromMpz(y_neighbors_node2.size()) 
+    // double data_y = getKBsFromMpz(y_neighbors_node1.size()) + getKBsFromMpz(y_neighbors_node2.size())
     //                 + getKBsFromMpz(x_neighbors_node1.size()) + getKBsFromMpz(x_neighbors_node2.size())
     //                 + getKBsFromMpz(localx.size()) + getKBsFromMpz(localy.size());
 
@@ -75,7 +80,7 @@ void run_baseline_protocol_inline2(vector<UndirectedEdge> evaluated_edges, vecto
     cout << "Score  : " <<  final_score << endl;
 
 #ifdef DEBUG_TIME
-    gettimeofday(&t_end, NULL);    
+    gettimeofday(&t_end, NULL);
     cout << "Time : " << std::setprecision(5) << getMillies(t_start, t_end) << " ms" << '\n';
     total_number_encryptions = n_encryptions_cross1 + n_encryptions_cross2 + n_encryptions_over;
     // cout << "Number of encryptions in crossover1 = " << n_encryptions_cross1 << endl;
@@ -83,7 +88,7 @@ void run_baseline_protocol_inline2(vector<UndirectedEdge> evaluated_edges, vecto
 
     // cout << "Number of encryptions in overlap = " << n_encryptions_over << endl;
     cout << "Total number of encryptions = " << total_number_encryptions << endl;
-    
+
 #endif
 
     }
@@ -94,17 +99,18 @@ void run_baseline_protocol_inline2(vector<UndirectedEdge> evaluated_edges, vecto
     #endif
 
 
-    
+
 }
 
-/// @brief 
-/// @param set1 
-/// @param set2 
-/// @param field 
-/// @return 
+/// @brief
+/// @param set1
+/// @param set2
+/// @param field
+/// @return
 uint32_t psi_ca2(vector<uint32_t> set1, vector<uint32_t> set2, prime_field* field, string description, int* number_encryptions)
 {
-    
+
+    cout << description << endl;
     uint32_t set1_size = set1.size();
     uint32_t set2_size = set2.size();
     mpz_t g, p, q, X, Y, Rc, Rc_prime, Rs, Rs_prime, inv_Rc_prime, tmp;
@@ -112,7 +118,7 @@ uint32_t psi_ca2(vector<uint32_t> set1, vector<uint32_t> set2, prime_field* fiel
     mpz_t encrypted_set2[set2_size];
 
     timeval t_start, t_end;
-        
+
     mpz_init_set(Rs, *((gmp_num*)field->get_rnd_num())->get_val());
     mpz_init_set(Rs_prime, *((gmp_num*)field->get_rnd_num())->get_val());
     mpz_init_set(g, *((gmp_num*)field->get_generator())->get_val());
@@ -133,87 +139,84 @@ uint32_t psi_ca2(vector<uint32_t> set1, vector<uint32_t> set2, prime_field* fiel
 
     mpz_init(X);
     mpz_init(Y);
+    mpz_init_set_si(tmp, 2);
+    gmp_printf("Element = %Zd\n", tmp);
+
     mpz_powm(X, g, Rc, p);
     mpz_powm(Y, g, Rs, p);
 
+    mpz_powm(tmp, tmp, Rc_prime, p);
 
-    for (size_t i = 0; i < set1_size; i++)
-    {
-        mpz_init_set_ui(tmp, set1.at(i));
-        mpz_init(encrypted_set1[i]);
-        // mpz_powm(encrypted_set1[i], g, tmp, p);
-        gettimeofday(&t_start, NULL);
-        mpz_powm(encrypted_set1[i], tmp, Rc_prime, p);
-        gettimeofday(&t_end, NULL);
-        *(number_encryptions) = *(number_encryptions) +1;
+    gmp_printf("Element = %Zd\n", tmp);
 
-    }
+    mpz_powm(tmp, tmp, inv_Rc_prime, p);
+
+    gmp_printf("Element = %Zd\n", tmp);
 
 
-    // ai' = (ai)^Rs'
-    for (size_t i = 0; i < set1_size; i++)
-    {
-        mpz_powm(encrypted_set1[i], encrypted_set1[i], Rs_prime, p);
-    }
-
-
-    // (hsj)^Rs'
-    for (size_t i = 0; i < set2_size; i++)
-    {
-        mpz_set_ui(tmp, set2.at(i));
-        mpz_init(encrypted_set2[i]);
-        // mpz_powm(encrypted_set1[i], g, tmp, p);
-        gettimeofday(&t_start, NULL);
-        mpz_powm(encrypted_set2[i], tmp, Rs_prime, p);
-        gettimeofday(&t_end, NULL);
-        *(number_encryptions) = *(number_encryptions) +1;
-    }
-
-
-    //X = X^Rs mod p
-    mpz_powm(X, X, Rs, p);
-
-
-    // bsj = X^Rs.(hsj)Rs'
-    for (size_t i = 0; i < set2_size; i++)
-    {
-        mpz_mul(encrypted_set2[i], encrypted_set2[i], X);
-        mpz_mod(encrypted_set2[i], encrypted_set2[i], p);
-
-        gmp_printf("Element of set 2 = %Zd\n", encrypted_set2[i]);
-        *(number_encryptions) = *(number_encryptions) +1;
-    }
-
-
-    //Y = Y^Rc mod p
-    mpz_powm(Y, Y, Rc, p);
-    // cout << "Count : " << *number_encryptions << endl;
-
-
-    // bci = (Y^Rc)(ai')^(1/Rc)'
-    for (size_t i = 0; i < set1_size; i++)
-    {
-        mpz_powm(encrypted_set1[i], encrypted_set1[i], inv_Rc_prime, p);
-        mpz_mul(encrypted_set1[i], encrypted_set1[i], Y);
-        mpz_mod(encrypted_set1[i], encrypted_set1[i], p);
-        gmp_printf("Element of set 1 = %Zd\n", encrypted_set1[i]);
-
-    }
-
-
-    int intersection_size = min({set1_size, set2_size});
-    mpz_t encrypted_intersection[intersection_size];
-
-    mpz_intersection(encrypted_set1, set1_size, encrypted_set2, set2_size, encrypted_intersection, &intersection_size);
-
-    cout << "Size of intersection : " << intersection_size << endl;
-
-
-
-#ifdef DEBUG_DATA
-    cout << "Data sent by party X in " << description << " : " << getKBsFromMpz(encrypted_set1, set1_size) << " kB" << endl;
-#endif
-
+//    for (size_t i = 0; i < set1_size; i++)
+//    {
+//        mpz_init_set_ui(tmp, set1.at(i));
+//        mpz_init(encrypted_set1[i]);
+//        mpz_powm(encrypted_set1[i], tmp, Rc_prime, p);
+//        *(number_encryptions) = *(number_encryptions) +1;
+//
+//    }
+//
+//
+//    // ai' = (ai)^Rs'
+//    for (size_t i = 0; i < set1_size; i++)
+//    {
+//        mpz_powm(encrypted_set1[i], encrypted_set1[i], Rs_prime, p);
+//    }
+//
+//
+//    //X = X^Rs mod p
+//    mpz_powm(X, X, Rs, p);
+//
+//
+//    // bsj = X^Rs.(hsj)Rs'
+//    for (size_t i = 0; i < set2_size; i++)
+//    {
+//        mpz_set_ui(tmp, set2.at(i));
+//        mpz_init(encrypted_set2[i]);
+//        mpz_powm(encrypted_set2[i], tmp, Rs_prime, p);
+//        mpz_mul(encrypted_set2[i], encrypted_set2[i], X);
+//        mpz_mod(encrypted_set2[i], encrypted_set2[i], p);
+//        gmp_printf("Element of set 2 = %Zd\n", encrypted_set2[i]);
+//
+//    }
+//
+//
+//
+//    //Y = Y^Rc mod p
+//    mpz_powm(Y, Y, Rc, p);
+//    // cout << "Count : " << *number_encryptions << endl;
+//
+//
+//    // bci = (Y^Rc)(ai')^(1/Rc)'
+//    for (size_t i = 0; i < set1_size; i++)
+//    {
+//        mpz_powm(encrypted_set1[i], encrypted_set1[i], inv_Rc_prime, p);
+//        mpz_mul(encrypted_set1[i], encrypted_set1[i], Y);
+//        mpz_mod(encrypted_set1[i], encrypted_set1[i], p);
+//        gmp_printf("Element of set 1 = %Zd\n", encrypted_set1[i]);
+//    }
+//
+//
+//    int intersection_size = min({set1_size, set2_size});
+//    mpz_t encrypted_intersection[intersection_size];
+//
+//    mpz_intersection(encrypted_set1, set1_size, encrypted_set2, set2_size, encrypted_intersection, &intersection_size);
+//
+//    cout << "Size of intersection : " << intersection_size << endl;
+//
+//
+//
+//#ifdef DEBUG_DATA
+//    cout << "Data sent by party X in " << description << " : " << getKBsFromMpz(encrypted_set1, set1_size) << " kB" << endl;
+//#endif
+//
 
     /*Clients its elements to server*/
     /*Server double encrypts client elements*/
@@ -290,7 +293,6 @@ uint32_t psi_ca2(vector<uint32_t> set1, vector<uint32_t> set2, prime_field* fiel
 //       mpz_clear(encrypted_set2[i]);
 //    }
 //
-    
+
 }
 
-    

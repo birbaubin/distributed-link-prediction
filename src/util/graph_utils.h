@@ -4,6 +4,10 @@
 #include <vector>
 #include <stdint.h>
 #include "typedefs.h"
+#include <iostream>
+#include <set>
+#include <random>
+#include <unordered_map>
 
 using namespace std;
 vector<uint32_t> neighbors(vector<UndirectedEdge> graph,  uint32_t node);
@@ -26,5 +30,7 @@ vector<uint32_t> select_random_node(vector<UndirectedEdge> graph, int number_of_
 bool edge_exists(vector<UndirectedEdge> graph, UndirectedEdge edge);
 
 vector<UndirectedEdge> generate_complete_graph(vector<uint32_t> nodes);
+
+vector<uint32_t> get_nodes_of_graph(unordered_map<uint32_t, vector<uint32_t > > graph);
 
 #endif

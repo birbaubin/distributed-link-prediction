@@ -2,6 +2,7 @@
 #define DATA_LOADER_H
 
 #include <vector>
+#include <unordered_map>
 #include <string>
 #include <fstream>
 #include <iostream>
@@ -11,7 +12,7 @@
 
 using namespace std;
 
-vector<UndirectedEdge> load_graph(uint32_t* size,  std::string filename);
+unordered_map<uint32_t, vector<uint32_t> > load_graph(std::string filename);
 
 
 #endif

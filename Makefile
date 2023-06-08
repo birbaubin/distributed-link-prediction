@@ -1,8 +1,8 @@
 HELPERS_SRC=src/util/*.cpp
 CRYPTO_SRC=src/util/crypto/*.cpp
 TESTS_SRC=src/tests/*.cpp
-NEW_PROTOCOL_SRC=src/new_dist_link_prediction/*.cpp
-BASELINE_PROTOCOL_SRC=src/baseline_dist_link_prediction/*.cpp
+NEW_PROTOCOL_SRC=src/new_dist_link_prediction/inline_new.cpp
+BASELINE_PROTOCOL_SRC=src/baseline_dist_link_prediction/inline_baseline.cpp
 OBJ=*.o
 OPENSSL_INCLUDE=-I/opt/homebrew/Cellar/openssl@3/3.0.8/include
 GMP_INCLUDE=-I/opt/homebrew/include
@@ -31,7 +31,7 @@ baseline_protocol:
 
 
 helpers:
-	g++ -c ${HELPERS_SRC} ${STDFLAG}
+	g++ -c ${HELPERS_SRC} ${STDFLAG} ${GMP_INCLUDE}
 
 tests:
 	g++ -c ${TESTS_SRC} ${STDFLAG}

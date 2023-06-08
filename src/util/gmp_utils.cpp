@@ -63,3 +63,21 @@ void mpz_intersection(mpz_t first_array[], int length_first_array,
     
 }
 
+void sha256Hash(mpz_t result, const mpz_t value) {
+    unsigned char hash[SHA256_DIGEST_LENGTH];
+    SHA256_CTX sha256;
+    SHA256_Init(&sha256);
+
+    // Convert the mpz_t value to a string
+    char* valueStr = mpz_get_str(NULL, 10, value);
+
+    // Compute the SHA-256 hash
+    SHA256_Update(&sha256, valueStr, strlen(valueStr));
+    SHA256_Final(hash, &sha256);
+
+    // Convert the hash to an mpz_t value
+    mpz_import(result, SHA256_DIGEST_LENGTH, 1, sizeof(unsigned char), 0, 0, hash);
+
+}
+
+

@@ -1,7 +1,7 @@
 #include "baseline_protocol.h"
 
-void run_baseline_protocol_inline(vector<UndirectedEdge> evaluated_edges, vector<UndirectedEdge> graph1, 
-                            vector<UndirectedEdge> graph2, pk_crypto* field)
+void run_baseline_protocol_inline(vector<UndirectedEdge> evaluated_edges, unordered_map<uint32_t, vector<uint32_t> > graph1,
+                                  unordered_map<uint32_t, vector<uint32_t> > graph2, pk_crypto* field, string dataset_name)
 {
 
    cout << "******************************* Baseline protocol *******************************" << endl;
@@ -11,37 +11,46 @@ void run_baseline_protocol_inline(vector<UndirectedEdge> evaluated_edges, vector
     gettimeofday(&t_protocol_start, NULL);
 #endif
 
+    ofstream logs("logs/gmp-baseline-"+dataset_name);
+    logs << "nodex,nodey,offline_time1,online_time1,offline_time2,online_time2,ai,ai_prime,ts,score\n";
 
     for (size_t i = 0; i < evaluated_edges.size(); i++)
     {
 
+#ifdef DEBUG_TIME
+        timeval t_start, t_end;
         gettimeofday(&t_start, NULL);
+        double offline_time1 = 0;
+        double offline_time2 = 0;
+        double online_time1 = 0;
+        double online_time2 = 0;
+        size_t size_of_ai = 0;
+        size_t size_of_ai_prime = 0;
+        size_t size_of_ts = 0;
+
+#endif
 
         //get current nodes from to evaluate in this iteration 
         uint32_t nodex = evaluated_edges.at(i).vertices[0];
         uint32_t nodey = evaluated_edges.at(i).vertices[1];
 
         cout << "--- Baseline link prediction for nodes " << nodex << " and node " << nodey << " ---" << endl;
-    
-        int total_number_encryptions = 0;
-        int n_encryptions_cross1 = 0;
-        int n_encryptions_cross2 = 0;
-        int n_encryptions_over = 0;
+
 
         //get neighbors of nodes we are doing prediction on 
-        vector<uint32_t> neighbors_nodex_1 = neighbors(graph1, nodex);
-        vector<uint32_t> neighbors_nodey_1 = neighbors(graph1, nodey);
-        vector<uint32_t> neighbors_nodex_2 = neighbors(graph2, nodex);
-        vector<uint32_t> neighbors_nodey_2 = neighbors(graph2, nodey);
+        vector<uint32_t> neighbors_nodex_1;
+        vector<uint32_t> neighbors_nodey_1;
+        vector<uint32_t> neighbors_nodex_2;
+        vector<uint32_t> neighbors_nodey_2;
+
+        if (graph1.find(nodex) != graph1.end()) neighbors_nodex_1 = graph1.at(nodex);
+        if (graph1.find(nodey) != graph1.end()) neighbors_nodey_1 = graph1.at(nodey);
+        if (graph2.find(nodex) != graph1.end()) neighbors_nodex_2 = graph2.at(nodex);
+        if (graph2.find(nodey) != graph1.end()) neighbors_nodey_2 = graph2.at(nodey);
 
         // Compute local1 and local2
         vector<uint32_t> local1 = int_intersection(neighbors_nodex_1, neighbors_nodey_1);
         vector<uint32_t> local2 = int_intersection(neighbors_nodex_2, neighbors_nodey_2);
-
-        #ifndef DEBUG_TIME
-            cout << "Size of local1 = " << localx.size() << endl;
-            cout << "Size of local2 = " << localy.size() << endl;
-        #endif 
 
         //remove local1 and local2 before PSI
         neighbors_nodex_1 = remove_vector(neighbors_nodex_1, local1);
@@ -49,51 +58,54 @@ void run_baseline_protocol_inline(vector<UndirectedEdge> evaluated_edges, vector
         neighbors_nodex_2 = remove_vector(neighbors_nodex_2, local2);
         neighbors_nodey_2 = remove_vector(neighbors_nodey_2, local2);
 
-        int size_neighbors_nodex_1 = neighbors_nodex_1.size();
-        int size_neighbors_nodey_1 = neighbors_nodey_1.size();
-        int size_neighbors_nodex_2 = neighbors_nodex_2.size();
-        int size_neighbors_nodey_2 = neighbors_nodey_2.size();
 
-    uint32_t cross1 = psi_ca(neighbors_nodex_1, neighbors_nodey_2, (prime_field*)field, "crossover 1", &n_encryptions_cross1);    
-    uint32_t cross2 = psi_ca(neighbors_nodey_1, neighbors_nodex_2, (prime_field*)field, "crossover 2", &n_encryptions_cross2);
-    uint32_t overlap = psi_ca(local1, local2, (prime_field*)field, "overlap", &n_encryptions_over);
+        uint32_t cross1 = psi_ca(neighbors_nodex_1, neighbors_nodey_2, (prime_field*)field, "crossover 1",
+                                 &online_time1, &online_time2, &offline_time1, &offline_time2, &size_of_ai, &size_of_ai_prime, &size_of_ts);
+        uint32_t cross2 = psi_ca(neighbors_nodey_1, neighbors_nodex_2, (prime_field*)field, "crossover 2",
+                                 &online_time1, &online_time2, &offline_time1, &offline_time2, &size_of_ai, &size_of_ai_prime, &size_of_ts);
+        uint32_t overlap = psi_ca(local1, local2, (prime_field*)field, "overlap",
+                                  &online_time1, &online_time2, &offline_time1, &offline_time2, &size_of_ai, &size_of_ai_prime, &size_of_ts);
 
-    // double data_x = getKBsFromMpz(x_neighbors_node1.size()) + getKBsFromMpz(x_neighbors_node2.size()) + getKBsFromMpz(localx.size());
-    // double data_y = getKBsFromMpz(y_neighbors_node1.size()) + getKBsFromMpz(y_neighbors_node2.size()) 
-    //                 + getKBsFromMpz(x_neighbors_node1.size()) + getKBsFromMpz(x_neighbors_node2.size())
-    //                 + getKBsFromMpz(localx.size()) + getKBsFromMpz(localy.size());
 
-#ifdef DEBUG_DATA
-    // cout << "Total data sent by party 1 : " << std::setprecision(2) << data_x << " kB" << endl;
-    // cout << "Total data sent by party 2 : " << std::setprecision(2) << data_y << " kB" << endl;
+        int score = local1.size() + local2.size() + cross2 + cross1 - overlap;
 
-#endif
+        cout << "Offline time1 " << offline_time1 << endl;
+        cout << "Offline time2 " << offline_time2 << endl;
+        cout << "Online time1 " << online_time1 << endl;
+        cout << "Online time2 " << online_time2 << endl;
 
-    int final_score = local1.size() + local2.size() + cross2 + cross1 - overlap;
+        cout << "ai " << size_of_ai << endl;
+        cout << "ai_prime " << size_of_ai_prime << endl;
+        cout << "ts " << size_of_ts << endl;
+
+        logs << nodex << "," << nodey <<","
+             << offline_time1 << ","
+             << online_time1 << ","
+             << offline_time2 << ","
+             << online_time2 << ","
+             << size_of_ai << ","
+             << size_of_ai_prime << ","
+             << size_of_ts << ","
+             << score << "\n";
+
 
     cout << "--- Results ---" << endl;
-    cout << "Score  : " <<  final_score << endl;
+    cout << "Score  : " <<  score << endl;
 
 #ifdef DEBUG_TIME
     gettimeofday(&t_end, NULL);    
     cout << "Time : " << std::setprecision(5) << getMillies(t_start, t_end) << " ms" << '\n';
-    total_number_encryptions = n_encryptions_cross1 + n_encryptions_cross2 + n_encryptions_over;
-    // cout << "Number of encryptions in crossover1 = " << n_encryptions_cross1 << endl;
-    // cout << "Number of encryptions in crossover2 = " << n_encryptions_cross2 << endl;
-
-    // cout << "Number of encryptions in overlap = " << n_encryptions_over << endl;
-    cout << "Total number of encryptions = " << total_number_encryptions << endl;
     
 #endif
 
     }
 
     #ifdef DEBUG_TIME
+    gettimeofday(&t_end, NULL);
     cout << "Time for all baseline predictions : " << std::setprecision(5)
                          << getMillies(t_protocol_start, t_end) << " ms" << '\n';
     #endif
 
-    
 }
 
 /// @brief 
@@ -101,7 +113,9 @@ void run_baseline_protocol_inline(vector<UndirectedEdge> evaluated_edges, vector
 /// @param set2 
 /// @param field 
 /// @return 
-uint32_t psi_ca(vector<uint32_t> set1, vector<uint32_t> set2, prime_field* field, string description, int* number_encryptions)
+uint32_t psi_ca(vector<uint32_t> set1, vector<uint32_t> set2, prime_field* field, string description,
+                double* online_time1, double* online_time2, double* offline_time1, double* offline_time2,
+                size_t* ai, size_t* ai_prime, size_t* ts)
 {
     
     uint32_t set1_size = set1.size();
@@ -110,7 +124,7 @@ uint32_t psi_ca(vector<uint32_t> set1, vector<uint32_t> set2, prime_field* field
     mpz_t encrypted_set1[set1_size];
     mpz_t encrypted_set2[set2_size];
 
-    timeval t_start, t_end;
+    timeval start, end;
         
     mpz_init_set(Rs, *((gmp_num*)field->get_rnd_num())->get_val());
     mpz_init_set(Rs_prime, *((gmp_num*)field->get_rnd_num())->get_val());
@@ -118,6 +132,8 @@ uint32_t psi_ca(vector<uint32_t> set1, vector<uint32_t> set2, prime_field* field
     mpz_init_set(p, *(field->get_p()));
     mpz_init_set(q, *((gmp_num*)field->get_order())->get_val());
     mpz_init_set(Rc, *((gmp_num*)field->get_rnd_num())->get_val());
+
+    gettimeofday(&start, NULL);
     mpz_init_set(Rc_prime, *((gmp_num*)field->get_rnd_num())->get_val());
     mpz_init(inv_Rc_prime);
     int result_inv = mpz_invert(inv_Rc_prime, Rc_prime, q);
@@ -133,19 +149,18 @@ uint32_t psi_ca(vector<uint32_t> set1, vector<uint32_t> set2, prime_field* field
     for (size_t i = 0; i < set1_size; i++)
     {
         mpz_init_set_ui(tmp, set1.at(i));
+        sha256Hash(tmp, tmp);
         mpz_init(encrypted_set1[i]);
         mpz_powm(encrypted_set1[i], g, tmp, p);
-
-        gettimeofday(&t_start, NULL);
         mpz_powm(encrypted_set1[i], encrypted_set1[i], Rc_prime, p);
-        gettimeofday(&t_end, NULL);
-
-
-        *(number_encryptions) = *(number_encryptions) +1;
 
     }
 
-    // cout << "Count : " << *number_encryptions << endl;
+    gettimeofday(&end, NULL);
+    *offline_time1 = *offline_time1 + getMillies(start, end);
+
+    *ai = *ai + size_of_array(encrypted_set1, set1_size);
+
 
 #ifdef DEBUG_DATA
     cout << "Data sent by party X in " << description << " : " << getKBsFromMpz(encrypted_set1, set1_size) << " kB" << endl;
@@ -155,27 +170,34 @@ uint32_t psi_ca(vector<uint32_t> set1, vector<uint32_t> set2, prime_field* field
     /*Clients its elements to server*/
     /*Server double encrypts client elements*/
 
+    gettimeofday(&start, NULL);
     for (size_t i = 0; i < set1_size; i++)
     {
         mpz_powm(encrypted_set1[i], encrypted_set1[i], Rs_prime, p);
-        *(number_encryptions) = *(number_encryptions) + 1;
 
     }
+    gettimeofday(&end, NULL);
+    *online_time2 = *online_time2 + getMillies(start, end);
 
-    // cout << "Count : " << *number_encryptions << endl;
+    *ai_prime = *ai_prime + size_of_array(encrypted_set1, set1_size);
 
-    
+
+    gettimeofday(&start, NULL);
     for (size_t i = 0; i < set2_size; i++)
     {
         mpz_set_ui(tmp, set2[i]);
+        sha256Hash(tmp, tmp);
         mpz_init(encrypted_set2[i]);
         mpz_powm(encrypted_set2[i], g, tmp, p);
         mpz_powm(encrypted_set2[i], encrypted_set2[i], Rs_prime, p);
-        *(number_encryptions) = *(number_encryptions) + 1 ;
-
+        sha256Hash(encrypted_set2[i], encrypted_set2[i]);
     }
 
-    // cout << "Count : " << *number_encryptions << endl;
+    gettimeofday(&end, NULL);
+    *offline_time2 = *offline_time2 + getMillies(start, end);
+
+    *ts = *ts + size_of_array(encrypted_set2, set2_size);
+
 
 
 #ifdef DEBUG_DATA
@@ -183,17 +205,15 @@ uint32_t psi_ca(vector<uint32_t> set1, vector<uint32_t> set2, prime_field* field
     + getKBsFromMpz(encrypted_set2, set2_size) << " kB" << endl;
 #endif
 
-    /*Server sends Y, its encrypted elements and the double encrypted elements of the client back to him*/ 
+    /*Server sends Y, its encrypted elements and the double encrypted elements of the client back to him*/
     /*The client removes its exponent*/
 
-
+    gettimeofday(&start, NULL);
     for (size_t i = 0; i < set1_size; i++)
     {
         mpz_powm(encrypted_set1[i], encrypted_set1[i], inv_Rc_prime, p);
-        *(number_encryptions) = *(number_encryptions) + 1;
+        sha256Hash(encrypted_set1[i], encrypted_set1[i]);
     }
-
-    // cout << "Count : " << *number_encryptions << endl;
 
 
     int size_intersection = min({set1_size, set2_size});
@@ -203,7 +223,8 @@ uint32_t psi_ca(vector<uint32_t> set1, vector<uint32_t> set2, prime_field* field
 
     vector<uint32_t> clear_intersection = int_intersection(set1, set2);
 
-    return size_intersection;
+    gettimeofday(&end, NULL);
+    *online_time1 = *online_time1 + getMillies(start, end);
 
     mpz_clear(g);
     mpz_clear(p);
@@ -213,18 +234,28 @@ uint32_t psi_ca(vector<uint32_t> set1, vector<uint32_t> set2, prime_field* field
     mpz_clear(Rc);
     mpz_clear(Rc_prime);
     mpz_clear(inv_Rc_prime);
-    
+
     for (size_t i = 0; i < set1_size; i++)
     {
-       mpz_clear(encrypted_set1[i]);
+        mpz_clear(encrypted_set1[i]);
     }
 
     for (size_t i = 0; i < set2_size; i++)
     {
-       mpz_clear(encrypted_set2[i]);
+        mpz_clear(encrypted_set2[i]);
     }
-    
-    
+
+    return size_intersection;
+
+}
+
+size_t size_of_array(mpz_t* vec, int length)
+{
+    size_t len = 0;
+    for(int i = 0; i < length; i++)
+        len+=(mpz_sizeinbase(vec[i], 2) / 8);
+
+    return len;
 }
 
     

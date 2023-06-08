@@ -2,64 +2,71 @@
 
 using namespace std;
 
-void run_clear_protocol(vector<UndirectedEdge> evaluated_edges,  vector<UndirectedEdge> graph1, vector<UndirectedEdge> graph2, string metric)
+void run_clear_protocol(vector<UndirectedEdge> evaluated_edges,  unordered_map<uint32_t, vector<uint32_t> > graph1,
+                        unordered_map<uint32_t, vector<uint32_t> > graph2, string metric)
 {
 
     cout << "******************************* Cleartext protocol between node using metric " << metric << " *******************************" << endl;
 
     timeval t_protocol_start, t_start, t_end;
-    uint32_t graph_x_size, graph_y_size = 0;
 
-    
-    #ifdef DEBUG_TIME
-        gettimeofday(&t_protocol_start, NULL);
-    #endif
+
+#ifdef DEBUG_TIME
+    gettimeofday(&t_protocol_start, NULL);
+#endif
 
     for (size_t i = 0; i < evaluated_edges.size(); i++)
     {
-        
-            #ifdef DEBUG_TIME
-                gettimeofday(&t_start, NULL);
-            #endif
 
-            uint32_t nodex = evaluated_edges.at(i).vertices[0];
-            uint32_t nodey = evaluated_edges.at(i).vertices[1];
+#ifdef DEBUG_TIME
+        gettimeofday(&t_start, NULL);
+#endif
 
-            cout << "--- Cleartext link prediction for nodes " << nodex << " and node " << nodey << " ---" << endl;
+    uint32_t nodex = evaluated_edges.at(i).vertices[0];
+    uint32_t nodey = evaluated_edges.at(i).vertices[1];
 
-            vector<uint32_t> neighbors_nodex_1 = neighbors(graph1, nodex);
-            vector<uint32_t> neighbors_nodey_1 = neighbors(graph1, nodey);
-            vector<uint32_t> neighbors_nodex_2 = neighbors(graph2, nodex);
-            vector<uint32_t> neighbors_nodey_2 = neighbors(graph2, nodey);
-
-            vector<uint32_t> neighbors_nodex = int_union(neighbors_nodex_1, neighbors_nodex_2);
-
-            vector<uint32_t> neighbors_nodey = int_union(neighbors_nodey_1, neighbors_nodey_2);
-    
-            vector<uint32_t> intersection = int_intersection(neighbors_nodex, neighbors_nodey);
+    cout << "--- Cleartext link prediction for nodes " << nodex << " and node " << nodey << " ---" << endl;
 
 
-            float score = 0;
+    vector<uint32_t> neighbors_nodex_1;
+    vector<uint32_t> neighbors_nodey_1;
+    vector<uint32_t> neighbors_nodex_2;
+    vector<uint32_t> neighbors_nodey_2;
 
-            if(metric == "neighbors") score = intersection.size();
-            else if (metric == "jaccard"){
-                vector<uint32_t> big_union = int_union(neighbors_nodex, neighbors_nodey);
+    if (graph1.find(nodex) != graph1.end()) neighbors_nodex_1 = graph1.at(nodex);
+    if (graph1.find(nodey) != graph1.end()) neighbors_nodey_1 = graph1.at(nodey);
+    if (graph2.find(nodex) != graph1.end()) neighbors_nodex_2 = graph2.at(nodex);
+    if (graph2.find(nodey) != graph1.end()) neighbors_nodey_2 = graph2.at(nodey);
 
-                score = (float) intersection.size() / big_union.size();
-            }
-            else if (metric == "cosine"){
-                score = (float) intersection.size() / (sqrt(neighbors_nodex.size()) * sqrt(neighbors_nodey.size()) + 1e-10);
-            }
 
-            cout << "--- Results ---" << endl;
+    vector<uint32_t> neighbors_nodex = int_union(neighbors_nodex_1, neighbors_nodex_2);
 
-            cout << "Score : " << score << endl;
+    vector<uint32_t> neighbors_nodey = int_union(neighbors_nodey_1, neighbors_nodey_2);
 
-            #ifdef DEBUG_TIME
-                gettimeofday(&t_end, NULL);
-                        cout << "Time : " << std::setprecision(5)
-                         << getMillies(t_start, t_end) << " ms" << '\n';
-            #endif
+    vector<uint32_t> intersection = int_intersection(neighbors_nodex, neighbors_nodey);
+
+
+    float score = 0;
+
+    if(metric == "neighbors") score = intersection.size();
+    else if (metric == "jaccard"){
+        vector<uint32_t> big_union = int_union(neighbors_nodex, neighbors_nodey);
+
+        score = (float) intersection.size() / big_union.size();
+    }
+    else if (metric == "cosine"){
+        score = (float) intersection.size() / (sqrt(neighbors_nodex.size()) * sqrt(neighbors_nodey.size()) + 1e-10);
+    }
+
+    cout << "--- Results ---" << endl;
+
+    cout << "Score : " << score << endl;
+
+    #ifdef DEBUG_TIME
+        gettimeofday(&t_end, NULL);
+                cout << "Time : " << std::setprecision(5)
+                 << getMillies(t_start, t_end) << " ms" << '\n';
+    #endif
 
         
     }
@@ -73,19 +80,14 @@ void run_clear_protocol(vector<UndirectedEdge> evaluated_edges,  vector<Undirect
 
 
 
-void run_new_protocol_inline(vector<UndirectedEdge> evaluated_edges, vector<UndirectedEdge> graph1, 
-vector<UndirectedEdge> graph2, pk_crypto* field, string metric, bool with_memory)
+void run_new_protocol_inline(vector<UndirectedEdge> evaluated_edges, unordered_map<uint32_t, vector<uint32_t> > graph1,
+                             unordered_map<uint32_t, vector<uint32_t> > graph2, pk_crypto* field, string metric, bool with_memory, string dataset_name)
 {
 
     string memory_str = with_memory ? " with memory ": " without memory ";
 
     cout << "******************************* Private Protocol" << memory_str <<"using metric " <<
     metric << " ********************************" << endl;
-
-    #ifdef DEBUG_TIME
-        timeval t_protocol_start, t_start, t_end;
-        gettimeofday(&t_protocol_start, NULL);
-    #endif
 
 
     mpz_t alpha, beta, p;
@@ -95,16 +97,29 @@ vector<UndirectedEdge> graph2, pk_crypto* field, string metric, bool with_memory
     mpz_init_set(p, *((prime_field*)field)->get_p());
 
 
-    unordered_map<uint32_t, vector<mpz_class> > memory_1, memory_2;
+    unordered_map<uint32_t, mpz_class > self_encryption_memory_1, self_encryption_memory_2;
+    unordered_map<uint32_t, vector<mpz_class> > , partner_encryption_memory_2;
+    vector<uint32_t> treated_nodes;
+
+
+
+    ofstream logs("logs/gmp-new-"+dataset_name);
+    logs << "nodex,nodey,offline_time1,online_time1,offline_time2,online_time2,union_time,intersection_time,ai,bi,ai_prime,bi_prime,ci,di,score\n";
+
 
     for (size_t i = 0; i < evaluated_edges.size(); i++)
     {
 
+#ifdef DEBUG_TIME
+        timeval t_start, t_end;
+        double offline_time1 = 0;
+        double offline_time2 = 0;
+        double online_time1 = 0;
+        double online_time2 = 0;
+        double union_time = 0;
+        double intersection_time = 0;
 
-        #ifdef DEBUG_TIME
-            timeval t_current_start;
-            gettimeofday(&t_current_start, NULL);
-        #endif
+#endif
 
         uint32_t nodex = evaluated_edges.at(i).vertices[0];
         uint32_t nodey = evaluated_edges.at(i).vertices[1];
@@ -115,273 +130,160 @@ vector<UndirectedEdge> graph2, pk_crypto* field, string metric, bool with_memory
         vector<mpz_class> encrypted_neighbors_nodey_1;
         vector<mpz_class> encrypted_neighbors_nodex_2;
         vector<mpz_class> encrypted_neighbors_nodey_2;
+
+        size_t size_of_ai;
+        size_t size_of_bi;
+        size_t size_of_ci;
+        size_t size_of_di;
+
+
         mpz_t tmp;
         mpz_init(tmp);
 
         int total_number_encryptions = 0;
 
-        #ifdef DEBUG_TIME
-            gettimeofday(&t_end, NULL);
-            cout << "Time for preliminary steps : " << getMillies(t_current_start, t_end) << " ms" << endl;
-            t_current_start = t_end;
-        #endif
+
         gettimeofday(&t_start, NULL);
 
-        //if encrypted neighbors of nodex have already been saved...
-        if(memory_1.find(nodex) != memory_1.end() && with_memory)
-        {
-            // cout << "Found " << nodex << " in memory_1" << endl;
-            
-            encrypted_neighbors_nodex_1 = memory_1.at(nodex);
+        encrypted_neighbors_nodex_1 = get_encrypted_neighbors(&self_encryption_memory_1, nodex, graph1, with_memory, alpha, p);
 
-            // gettimeofday(&t_end, NULL);
-            // cout << "Time for reading from memory: " << std::setprecision(5) << getMillies(t_start, t_end) << " ms" << '\n';
+        encrypted_neighbors_nodey_1 = get_encrypted_neighbors(&self_encryption_memory_1, nodey, graph1, with_memory, alpha, p);
+
+        gettimeofday(&t_end, NULL);
+        offline_time1 = offline_time1 + getMillies(t_start, t_end);
+
+
+        gettimeofday(&t_start, NULL);
+        encrypted_neighbors_nodex_2 = get_encrypted_neighbors(&self_encryption_memory_2, nodex, graph2, with_memory, beta, p);
+
+        encrypted_neighbors_nodey_2 = get_encrypted_neighbors(&self_encryption_memory_2, nodey, graph2, with_memory, beta, p);
+        gettimeofday(&t_end, NULL);
+        offline_time2 = offline_time2 + getMillies(t_start, t_end);
+
+        gettimeofday(&t_start, NULL);
+
+
+        if(std::find(treated_nodes.begin(), treated_nodes.end(), nodex) != treated_nodes.end())
+        {
+            size_of_ai = 0;
+            size_of_ci = 0;
         }
-        else
-        {
-            
-            vector<uint32_t> neighbors_nodex_1 = neighbors(graph1, nodex);
-            int size_neighbors_nodex_1 = neighbors_nodex_1.size();
-
-            for (size_t i = 0; i < size_neighbors_nodex_1; i++)
-            {
-                
-                mpz_set_ui(tmp, neighbors_nodex_1.at(i));
-                mpz_powm(tmp, tmp, alpha, p);
-                encrypted_neighbors_nodex_1.push_back(mpz_class(tmp));
-                total_number_encryptions++;
-            }
-
-            memory_1.insert({nodex, encrypted_neighbors_nodex_1});
-        }
-
-       
-        #ifdef DEBUG_STEPS
-            gettimeofday(&t_end, NULL);
-            cout << "Time for computing ai's : " << std::setprecision(5) << getMillies(t_start, t_end) << " ms" << '\n';
-            t_start = t_end;
-        #endif
-
-
-    //     //if encrypted neighbors of nodey have already been saved...
-        if(memory_1.find(nodey) != memory_1.end() && with_memory)
-        {
-            encrypted_neighbors_nodey_1 = memory_1.at(nodey);
+        else{
+            size_of_ai = size_of_vector(encrypted_neighbors_nodex_1);
+            size_of_ci = size_of_vector(encrypted_neighbors_nodex_2);
 
         }
-        else
+
+        if(std::find(treated_nodes.begin(), treated_nodes.end(), nodey) != treated_nodes.end())
         {
-            vector<uint32_t> neighbors_nodey_1 = neighbors(graph1, nodey);
-            int size_neighbors_nodey_1 = neighbors_nodey_1.size();
-
-            for (size_t i = 0; i < size_neighbors_nodey_1; i++)
-            {
-                mpz_set_ui(tmp, neighbors_nodey_1.at(i));
-                mpz_powm(tmp, tmp, alpha, p);
-                encrypted_neighbors_nodey_1.push_back(mpz_class(tmp));
-                total_number_encryptions++;
-            }
-
-            memory_1.insert({nodey, encrypted_neighbors_nodey_1});
+            size_of_bi = 0;
+            size_of_di = 0;
         }
-        
-
-        #ifdef DEBUG_STEPS
-            gettimeofday(&t_end, NULL);
-            cout << "Time for computing bi's : " << std::setprecision(5) << getMillies(t_start, t_end) << " ms" << '\n';
-            t_start = t_end;
-        #endif
-
-
-        #ifdef DEBUG_DATA
-            cout << "Data sent by party X : " << getKBsFromMpz(encrypted_neighbors_nodex_1, size_neighbors_nodex_1) 
-                                    + getKBsFromMpz(encrypted_neighbors_nodey_1, size_neighbors_nodey_1) << " kB" << endl;
-        #endif
+        else{
+            size_of_bi =  size_of_vector(encrypted_neighbors_nodey_1);
+            size_of_di = size_of_vector(encrypted_neighbors_nodey_2);
+        }
 
 
         for (size_t i = 0; i < encrypted_neighbors_nodex_1.size(); i++)
         {
-            // mpz_init_set_ui(encrypted_neighbors_nodex_1[i], x_neighbors_node1.at(i));
+
             mpz_powm(encrypted_neighbors_nodex_1.at(i).get_mpz_t(),
-                    encrypted_neighbors_nodex_1.at(i).get_mpz_t(), 
-                    beta, p);
-            // gmp_printf("Encryption of %d : %Zd\n\n", x_neighbors_node1.at(i), encrypted_neighbors_nodex_1[i]);
+                     encrypted_neighbors_nodex_1.at(i).get_mpz_t(),
+                     beta, p);
+
             total_number_encryptions++;
         }
 
-        #ifdef DEBUG_STEPS
-            gettimeofday(&t_end, NULL);
-            cout << "Time for computing ai_primes : " << std::setprecision(5) << getMillies(t_start, t_end) << " ms" << '\n';
-            t_start = t_end;
-        #endif
+        size_t size_of_ai_prime = size_of_vector(encrypted_neighbors_nodex_1);
+
 
         for (size_t i = 0; i < encrypted_neighbors_nodey_1.size(); i++)
         {
-            // mpz_init_set_ui(encrypted_neighbors_nodey_1[i], neighbors_nodey_1.at(i));
             mpz_powm(encrypted_neighbors_nodey_1.at(i).get_mpz_t(),
-                    encrypted_neighbors_nodey_1.at(i).get_mpz_t(),
-                    beta, p);
+                     encrypted_neighbors_nodey_1.at(i).get_mpz_t(),
+                     beta, p);
             total_number_encryptions++;
-            // gmp_printf("Encryption of %d : %Zd\n\n", neighbors_nodey_1.at(i), encrypted_neighbors_nodey_1[i]);
         }
 
-        #ifdef DEBUG_STEPS
-            gettimeofday(&t_end, NULL);
-            cout << "Time for computing bi_primes : " << std::setprecision(5) << getMillies(t_start, t_end) << " ms" << '\n';
-            t_start = t_end;
-        #endif
+        size_t size_of_bi_prime = size_of_vector(encrypted_neighbors_nodey_1);
 
+        gettimeofday(&t_end, NULL);
+        online_time2 = online_time2 + getMillies(t_start, t_end);
 
-    //     //if encrypted neighbors of nodex have already been saved...
-        if(memory_2.find(nodex) != memory_2.end() && with_memory)
-        {
-            encrypted_neighbors_nodex_2 = memory_2.at(nodex);
-        }
-        else
-        {
-            vector<uint32_t> neighbors_nodex_2 = neighbors(graph2, nodex);
-            int size_neighbors_nodex_2 = neighbors_nodex_2.size();
-
-            for (size_t i = 0; i < size_neighbors_nodex_2; i++)
-            {
-                mpz_set_ui(tmp, neighbors_nodex_2.at(i));
-                mpz_powm(tmp, tmp, beta, p);
-                encrypted_neighbors_nodex_2.push_back(mpz_class(tmp));
-                // gmp_printf("Encryption of %d : %Zd\n\n", x_neighbors_node1.at(i), encrypted_neighbors_nodex_1[i]);
-                total_number_encryptions++;
-            }
-
-            memory_2.insert({nodex, encrypted_neighbors_nodex_2});
-        }
-        
-
-        #ifdef DEBUG_STEPS
-            gettimeofday(&t_end, NULL);
-            cout << "Time for computing ci's : " << std::setprecision(5) << getMillies(t_start, t_end) << " ms" << '\n';
-            t_start = t_end;
-        #endif
-
-
-        if(memory_2.find(nodey) != memory_2.end() && with_memory)
-        {
-            encrypted_neighbors_nodey_2 = memory_2.at(nodey);
-        }
-        else
-        {
-            vector<uint32_t> neighbors_nodey_2 = neighbors(graph2, nodey);
-            int size_neighbors_nodey_2 = neighbors_nodey_2.size();
-
-            for (size_t i = 0; i < size_neighbors_nodey_2; i++)
-            {
-                mpz_set_ui(tmp, neighbors_nodey_2.at(i));
-                mpz_powm(tmp, tmp, beta, p);
-                encrypted_neighbors_nodey_2.push_back(mpz_class(tmp));
-                // gmp_printf("Encryption of %d : %Zd\n\n", x_neighbors_node1.at(i), encrypted_neighbors_nodex_1[i]);
-                total_number_encryptions++;
-            }
-
-            memory_2.insert({nodey, encrypted_neighbors_nodey_2});
-        }
-        
-
-        #ifdef DEBUG_STEPS
-            gettimeofday(&t_end, NULL);
-            cout << "Time for computing di's : " << std::setprecision(5) << getMillies(t_start, t_end) << " ms" << '\n';
-            t_start = t_end;
-        #endif
-
-        #ifdef DEBUG_DATA
-            cout << "Data sent by party Y : " << getKBsFromMpz(encrypted_neighbors_nodex_1, size_neighbors_nodex_1) 
-                                    + getKBsFromMpz(encrypted_neighbors_nodey_1, size_neighbors_nodey_1)
-                                    + getKBsFromMpz(encrypted_neighbors_nodex_2, size_neighbors_nodex_2)
-                                    + getKBsFromMpz(encrypted_neighbors_nodey_2, size_neighbors_nodey_2) << " kB" << endl;
-        #endif
+        gettimeofday(&t_start, NULL);
 
 
         for (size_t i = 0; i < encrypted_neighbors_nodex_2.size(); i++)
         {
-            // mpz_init_set_ui(encrypted_neighbors_nodex_1[i], x_neighbors_node1.at(i));
 
-            mpz_powm(encrypted_neighbors_nodex_2.at(i).get_mpz_t(), 
-                    encrypted_neighbors_nodex_2.at(i).get_mpz_t(), 
+            mpz_powm(encrypted_neighbors_nodex_2.at(i).get_mpz_t(),
+                    encrypted_neighbors_nodex_2.at(i).get_mpz_t(),
                     alpha, p);
-
             total_number_encryptions++;
         }
 
-        #ifdef DEBUG_STEPS
-            gettimeofday(&t_end, NULL);
-            cout << "Time for computing ci_primes : " << std::setprecision(5) << getMillies(t_start, t_end) << " ms" << '\n';
-            t_start = t_end;
-        #endif
 
         for (size_t i = 0; i < encrypted_neighbors_nodey_2.size(); i++)
         {
-            // mpz_init_set_ui(encrypted_neighbors_nodey_1[i], neighbors_nodey_1.at(i));
-            mpz_powm(encrypted_neighbors_nodey_2.at(i).get_mpz_t(), 
-                    encrypted_neighbors_nodey_2.at(i).get_mpz_t(), 
+            mpz_powm(encrypted_neighbors_nodey_2.at(i).get_mpz_t(),
+                    encrypted_neighbors_nodey_2.at(i).get_mpz_t(),
                     alpha, p);
-            // gmp_printf("Encryption of %d : %Zd\n\n", neighbors_nodey_2.at(i), encrypted_neighbors_nodey_2[i]);
             total_number_encryptions++;
         }
 
-        #ifdef DEBUG_STEPS
-            gettimeofday(&t_end, NULL);
-            cout << "Time for computing di_primes : " << std::setprecision(5) 
-            << getMillies(t_start, t_end) << " ms" << '\n';
-            t_start = t_end;
-        #endif
+
 
         float score = compute_similarity_score(encrypted_neighbors_nodex_1, encrypted_neighbors_nodex_2, encrypted_neighbors_nodey_1, encrypted_neighbors_nodey_2, metric);
- 
-        #ifdef DEBUG_STEPS
-            gettimeofday(&t_end, NULL);
-            cout << "Time for computing intersection : " << std::setprecision(5) << getMillies(t_start, t_end) << " ms" << '\n';
-            t_start = t_end;
-        #endif
+
+        gettimeofday(&t_end, NULL);
+        online_time1 = online_time1 + getMillies(t_start, t_end);
 
         cout << "--- Results ---" << endl;
 
         cout << "Score : " << score << endl;
+        //
+        cout << "Offline time graph1 : " << std::setprecision(5)
+             << offline_time1 << " ms" << '\n';
+        cout << "Offline time graph2 : " << std::setprecision(5)
+             << offline_time2 << " ms" << '\n';
+        cout << "Online time graph1 : " << std::setprecision(5)
+             << online_time1 << " ms" << '\n';
+        cout << "Online time graph2 : " << std::setprecision(5)
+             << online_time2 << " ms" << '\n';
+        cout << "Union time : " << std::setprecision(5)
+             << union_time << " ms" << '\n';
+        cout << "Intersection time : " << std::setprecision(5)
+             << intersection_time << " ms" << '\n';
 
-        #ifdef DEBUG_TIME
-            gettimeofday(&t_end, NULL);
-            cout << "Total number of encryptions : " << total_number_encryptions << endl;
+        cout << "Size of ai : "<< size_of_ai << endl;
+        cout << "Size of bi : "<< size_of_bi << endl;
+        cout << "Size of ai-prime : "<< size_of_ai_prime << endl;
+        cout << "Size of bi-prime : "<< size_of_bi_prime << endl;
+        cout << "Size of ci : "<< size_of_ci << endl;
+        cout << "Size of di : " << size_of_di << endl;
 
-            cout << "Time : " << std::setprecision(5)
-                        << getMillies(t_current_start, t_end) << " ms" << '\n';
-        #endif
+        logs << nodex << "," << nodey <<","
+             << offline_time1 << ","
+             << online_time1 << ","
+             << offline_time2 << ","
+             << online_time2 << ","
+             << union_time << ","
+             << intersection_time << ","
+             << size_of_ai << ","
+             << size_of_bi << ","
+             << size_of_ai_prime << ","
+             << size_of_bi_prime << ","
+             << size_of_ci << ","
+             << size_of_di << ","
+             << score << "\n";
 
-
-
-    //     for (size_t i = 0; i < size_neighbors_nodex_1; i++)
-    //     {
-    //         mpz_clear(encrypted_neighbors_nodex_1[i]);
-    //     }
-
-    //     for (size_t i = 0; i < size_neighbors_nodey_1; i++)
-    //     {
-    //         mpz_clear(encrypted_neighbors_nodey_1[i]);
-    //     }
-
-    //     for (size_t i = 0; i < size_neighbors_nodex_2; i++)
-    //     {
-    //         mpz_clear(encrypted_neighbors_nodex_2[i]);
-    //     }
-
-    //     for (size_t i = 0; i < size_neighbors_nodey_2; i++)
-    //     {
-    //         mpz_clear(encrypted_neighbors_nodey_2[i]);
-    //     }
-    // }
-
-    #ifdef DEBUG_TIME
-        gettimeofday(&t_end, NULL);    
-        cout << "Time for all new protocol predictions : " << std::setprecision(5) << getMillies(t_protocol_start, t_end) << " ms" << '\n';
-
-    #endif
-    
+        treated_nodes.push_back(nodex);
+        treated_nodes.push_back(nodey);
     }
+
+    logs.close();
+
 }
 
 float compute_similarity_score(vector<mpz_class> encrypted_neighbors_nodex_1,
@@ -491,4 +393,60 @@ float compute_similarity_score(vector<mpz_class> encrypted_neighbors_nodex_1,
 
     return score;
 
+}
+
+vector<mpz_class> get_encrypted_neighbors(unordered_map<uint32_t, mpz_class > *encryption_memory,
+                                          uint32_t node, unordered_map<uint32_t, vector<uint32_t>> graph, bool with_memory,
+                                          mpz_t expo, mpz_t modulus)
+{
+
+    vector<mpz_class> encrypted_neighbors;
+    vector<uint32_t> clear_neighbors;
+    mpz_t element;
+
+
+    if(graph.find(node) != graph.end()) {
+        clear_neighbors = graph.at(node);
+
+        for (uint32_t clear_node: clear_neighbors)
+        {
+
+            if (encryption_memory->find(clear_node) != encryption_memory->end() && with_memory){
+
+                mpz_init_set(element, encryption_memory->at(clear_node).get_mpz_t());
+            }
+            else{
+                mpz_init_set_ui(element, clear_node);
+                mpz_powm(element, element, expo, modulus);
+                if(with_memory)
+                {
+//                    mpz_t encrypted_node;
+//                    mpz_init_set(encrypted_node, element);
+                    encryption_memory->insert({clear_node, mpz_class(element)});
+
+                }
+            }
+
+            encrypted_neighbors.push_back(mpz_class(element));
+        }
+    }
+    else
+    {
+        vector<uint32_t> neighbors;
+        graph.insert({node, neighbors});
+
+    }
+
+    return encrypted_neighbors;
+
+}
+
+
+size_t size_of_vector(std::vector<mpz_class> vec)
+{
+    if(vec.empty())
+        return 0;
+
+    size_t len = mpz_sizeinbase(vec.at(0).get_mpz_t(), 2) / 8;
+    return len*vec.size();
 }
