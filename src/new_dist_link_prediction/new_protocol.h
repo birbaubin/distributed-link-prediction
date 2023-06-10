@@ -34,7 +34,7 @@ float compute_similarity_score(vector<mpz_class> encrypted_neighbors_nodex_1,
 
 vector<mpz_class> get_encrypted_neighbors(unordered_map<uint32_t, mpz_class > *encryption_memory,
                                           uint32_t node, unordered_map<uint32_t, vector<uint32_t>> graph, bool with_memory,
-                                          mpz_t expo, mpz_t modulus);
+                                          mpz_t expo, mpz_t modulus, mpz_t g);
 
 
 size_t size_of_vector(std::vector<mpz_class> vec);

@@ -53,15 +53,13 @@ void run_clear_protocol(vector<UndirectedEdge> evaluated_edges,  unordered_map<u
             score = (float) intersection.size() / (sqrt(neighbors_nodex.size()) * sqrt(neighbors_nodey.size()) + 1e-10);
         }
 
-    //    cout << "--- Results ---" << endl;
-    //
-    //    cout << "Score : " << score << endl;
 
-    //    #ifdef DEBUG_TIME
-    //        gettimeofday(&t_end, NULL);
-    //                cout << "Time : " << std::setprecision(5)
-    //                 << getMillies(t_start, t_end) << " ms" << '\n';
-    //    #endif
+
+        #ifdef DEBUG
+        cout << "--- Results ---" << endl;
+
+        cout << "Score : " << score << endl;
+        #endif
 
 
         gettimeofday(&t_end, NULL);
@@ -169,10 +167,11 @@ void run_new_protocol_inline(vector<UndirectedEdge> evaluated_edges, unordered_m
     metric << " ********************************" << endl;
 
 
-    mpz_t alpha, beta, p;
+    mpz_t alpha, beta, p, g;
 
     mpz_init_set(alpha, *((gmp_num*)field->get_rnd_num())->get_val());
     mpz_init_set(beta, *((gmp_num*)field->get_rnd_num())->get_val());
+    mpz_init_set(g, *((gmp_num*)field->get_generator())->get_val());
     mpz_init_set(p, *((prime_field*)field)->get_p());
 
 
@@ -231,11 +230,11 @@ void run_new_protocol_inline(vector<UndirectedEdge> evaluated_edges, unordered_m
 
 
         if(! nodex_already_treated)
-            encrypted_neighbors_nodex_1 = get_encrypted_neighbors(&self_encryption_memory_1, nodex, graph1, with_memory, alpha, p);
+            encrypted_neighbors_nodex_1 = get_encrypted_neighbors(&self_encryption_memory_1, nodex, graph1, with_memory, alpha, p, g);
         else encrypted_neighbors_nodex_1 = final_encryptions_1.at(nodex);
 
         if(! nodey_already_treated)
-            encrypted_neighbors_nodey_1 = get_encrypted_neighbors(&self_encryption_memory_1, nodey, graph1, with_memory, alpha, p);
+            encrypted_neighbors_nodey_1 = get_encrypted_neighbors(&self_encryption_memory_1, nodey, graph1, with_memory, alpha, p, g);
         else encrypted_neighbors_nodey_1 = final_encryptions_1.at(nodey);
 
         gettimeofday(&t_end, NULL);
@@ -244,11 +243,11 @@ void run_new_protocol_inline(vector<UndirectedEdge> evaluated_edges, unordered_m
 
         gettimeofday(&t_start, NULL);
         if(! nodex_already_treated)
-            encrypted_neighbors_nodex_2 = get_encrypted_neighbors(&self_encryption_memory_2, nodex, graph2, with_memory, beta, p);
+            encrypted_neighbors_nodex_2 = get_encrypted_neighbors(&self_encryption_memory_2, nodex, graph2, with_memory, beta, p, g);
         else encrypted_neighbors_nodex_2 = final_encryptions_2.at(nodex);
 
         if(! nodey_already_treated)
-            encrypted_neighbors_nodey_2 = get_encrypted_neighbors(&self_encryption_memory_2, nodey, graph2, with_memory, beta, p);
+            encrypted_neighbors_nodey_2 = get_encrypted_neighbors(&self_encryption_memory_2, nodey, graph2, with_memory, beta, p, g);
         else encrypted_neighbors_nodey_2 = final_encryptions_2.at(nodey);
 
         gettimeofday(&t_end, NULL);
@@ -507,7 +506,7 @@ float compute_similarity_score(vector<mpz_class> encrypted_neighbors_nodex_1,
 
 vector<mpz_class> get_encrypted_neighbors(unordered_map<uint32_t, mpz_class > *encryption_memory,
                                           uint32_t node, unordered_map<uint32_t, vector<uint32_t>> graph, bool with_memory,
-                                          mpz_t expo, mpz_t modulus)
+                                          mpz_t expo, mpz_t modulus, mpz_t g)
 {
 
     vector<mpz_class> encrypted_neighbors;
@@ -527,11 +526,10 @@ vector<mpz_class> get_encrypted_neighbors(unordered_map<uint32_t, mpz_class > *e
             }
             else{
                 mpz_init_set_ui(element, clear_node);
-                mpz_powm(element, element, expo, modulus);
+                mpz_mul(element, element, expo);
+                mpz_powm(element, g, element, modulus);
                 if(with_memory)
                 {
-//                    mpz_t encrypted_node;
-//                    mpz_init_set(encrypted_node, element);
                     encryption_memory->insert({clear_node, mpz_class(element)});
 
                 }
