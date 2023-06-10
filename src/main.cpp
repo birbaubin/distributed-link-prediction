@@ -29,10 +29,10 @@ int main(int argc, char** argv)
 //
     vector<UndirectedEdge> evaluated_graph = generate_complete_graph(selected_nodes);
 
-    run_local_protocol(evaluated_graph, graph1, "neighbors", "net1-"+dataset_name);
-    run_local_protocol(evaluated_graph, graph2, "neighbors", "net1-"+dataset_name);
+//    run_local_protocol(evaluated_graph, graph1, "neighbors", "net1-"+dataset_name);
+//    run_local_protocol(evaluated_graph, graph2, "neighbors", "net1-"+dataset_name);
 
-    run_baseline_protocol_inline(evaluated_graph, graph1, graph2, field, dataset_name);
+//    run_baseline_protocol_inline(evaluated_graph, graph1, graph2, field, dataset_name);
 
     run_new_protocol_inline(evaluated_graph, graph1, graph2, field, "neighbors", true, dataset_name);
 

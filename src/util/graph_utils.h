@@ -7,6 +7,7 @@
 #include <iostream>
 #include <set>
 #include <random>
+#include <algorithm>
 #include <unordered_map>
 
 using namespace std;

@@ -98,6 +98,7 @@ void run_local_protocol(vector<UndirectedEdge> evaluated_edges,  unordered_map<u
     {
 
 
+        gettimeofday(&t_start, NULL);
         uint32_t nodex = evaluated_edges.at(i).vertices[0];
         uint32_t nodey = evaluated_edges.at(i).vertices[1];
 
@@ -126,7 +127,7 @@ void run_local_protocol(vector<UndirectedEdge> evaluated_edges,  unordered_map<u
             score = (float) intersection.size() / (sqrt(neighbors_nodex.size()) * sqrt(neighbors_nodey.size()) + 1e-10);
         }
 
-
+        gettimeofday(&t_end, NULL);
 
         #ifdef DEBUG
 
@@ -134,7 +135,7 @@ void run_local_protocol(vector<UndirectedEdge> evaluated_edges,  unordered_map<u
 
         cout << "Score : " << score << endl;
 
-                gettimeofday(&t_end, NULL);
+
                         cout << "Time : " << std::setprecision(5)
                          << getMillies(t_start, t_end) << " ms" << '\n';
         #endif
@@ -388,6 +389,7 @@ void run_new_protocol_inline(vector<UndirectedEdge> evaluated_edges, unordered_m
         final_encryptions_1.insert({nodey, encrypted_neighbors_nodey_1});
         final_encryptions_2.insert({nodex, encrypted_neighbors_nodex_2});
         final_encryptions_2.insert({nodey, encrypted_neighbors_nodey_2});
+
     }
 
     logs.close();

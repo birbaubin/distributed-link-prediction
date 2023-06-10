@@ -55,10 +55,16 @@ void run_baseline_protocol_inline(vector<UndirectedEdge> evaluated_edges, unorde
 
         uint32_t cross1 = psi_ca(neighbors_nodex_1, neighbors_nodey_2, (prime_field*)field, "crossover 1",
                                  &online_time1, &online_time2, &offline_time1, &offline_time2, &size_of_ai, &size_of_ai_prime, &size_of_ts);
+
+//        cout << "First PSI" << endl;
         uint32_t cross2 = psi_ca(neighbors_nodey_1, neighbors_nodex_2, (prime_field*)field, "crossover 2",
                                  &online_time1, &online_time2, &offline_time1, &offline_time2, &size_of_ai, &size_of_ai_prime, &size_of_ts);
+//        cout << "Second PSI" << endl;
+
         uint32_t overlap = psi_ca(local1, local2, (prime_field*)field, "overlap",
                                   &online_time1, &online_time2, &offline_time1, &offline_time2, &size_of_ai, &size_of_ai_prime, &size_of_ts);
+//        cout << "Third PSI" << endl;
+
 
 
         int score = local1.size() + local2.size() + cross2 + cross1 - overlap;

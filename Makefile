@@ -14,7 +14,7 @@ STDFLAG=-std=c++17
 
 
 all: helpers crypto tests baseline_protocol new_protocol inline
-	g++ ${OBJ} -o output ${OPENSSL_FLAGS} ${GMP_FLAGS} ${BOOST_FLAGS} ${STDFLAG}
+	g++ ${OBJ} -o output ${OPENSSL_FLAGS} ${GMP_FLAGS} ${STDFLAG}
 
 inline: 
 	g++ -c src/main.cpp ${OPENSSL_INCLUDE} ${STDFLAG} ${GMP_INCLUDE}
