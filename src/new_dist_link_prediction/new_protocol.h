@@ -21,8 +21,7 @@ uint32_t run_party_y(vector<uint32_t>y_neighbors_node1, vector<uint32_t> y_neigh
 void run_new_protocol_inline(vector<UndirectedEdge> evaluated_edges, unordered_map<uint32_t, vector<uint32_t> > graph1,
                              unordered_map<uint32_t, vector<uint32_t> > graph2, pk_crypto* field, string metric, bool with_memory, string dataset_name);
 
-void run_clear_protocol(vector<UndirectedEdge> evaluated_edges,  unordered_map<uint32_t, vector<uint32_t> > graph1,
-                        unordered_map<uint32_t, vector<uint32_t> > graph2, string metric, string dataset_name);
+
 
 void run_local_protocol(vector<UndirectedEdge> evaluated_edges,  unordered_map<uint32_t, vector<uint32_t> > graph, string metric, string dataset_name);
 
