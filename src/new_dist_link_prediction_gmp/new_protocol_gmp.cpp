@@ -1,11 +1,11 @@
-#include "new_protocol.h"
+#include "new_protocol_gmp.h"
 
 using namespace std;
 
 
 
 
-void run_new_protocol_inline(vector<UndirectedEdge> evaluated_edges, unordered_map<uint32_t, vector<uint32_t> > graph1,
+void run_new_protocol_gmp(vector<UndirectedEdge> evaluated_edges, unordered_map<uint32_t, vector<uint32_t> > graph1,
                              unordered_map<uint32_t, vector<uint32_t> > graph2, pk_crypto* field, string metric, bool with_memory, string dataset_name)
 {
 
@@ -54,7 +54,7 @@ void run_new_protocol_inline(vector<UndirectedEdge> evaluated_edges, unordered_m
         bool nodey_already_treated = find(treated_nodes.begin(), treated_nodes.end(), nodey) != treated_nodes.end();
 
 
-        cout << "--- New link prediction for nodes " << nodex << " and node " << nodey << " ---" << endl;
+        cout << "--- New link prediction (GMP) for nodes " << nodex << " and node " << nodey << " ---" << endl;
 
         vector<mpz_class> encrypted_neighbors_nodex_1;
         vector<mpz_class> encrypted_neighbors_nodey_1;

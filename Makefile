@@ -2,7 +2,8 @@ HELPERS_SRC=src/util/*.cpp
 CRYPTO_SRC=src/util/crypto/*.cpp
 TESTS_SRC=src/tests/*.cpp
 LOCAL_PROTOCOL_SRC=src/local_link_prediction/local_protocol.cpp
-NEW_PROTOCOL_SRC=src/new_dist_link_prediction/new_protocol.cpp
+NEW_PROTOCOL_ECC_SRC=src/new_dist_link_prediction_ecc/new_protocol_ecc.cpp
+NEW_PROTOCOL_GMP_SRC=src/new_dist_link_prediction_gmp/new_protocol_gmp.cpp
 BASELINE_PROTOCOL_SRC=src/baseline_dist_link_prediction/inline_baseline.cpp
 OBJ=*.o
 OPENSSL_INCLUDE=-I/opt/homebrew/Cellar/openssl@3/3.0.8/include
@@ -14,7 +15,7 @@ STDFLAG=-std=c++17
 
 
 
-all: helpers crypto tests local_protocol baseline_protocol new_protocol inline
+all: helpers crypto tests local_protocol baseline_protocol new_protocol new_protocol_optimized inline
 	g++ ${OBJ} -o output ${OPENSSL_FLAGS} ${GMP_FLAGS} ${STDFLAG}
 
 inline: 
@@ -25,7 +26,11 @@ multiprocess:
 
 
 new_protocol:
-	g++ -c ${NEW_PROTOCOL_SRC} ${STDFLAG} ${OPENSSL_INCLUDE}  ${GMP_INCLUDE}
+	g++ -c ${NEW_PROTOCOL_GMP_SRC} ${STDFLAG} ${OPENSSL_INCLUDE}  ${GMP_INCLUDE}
+
+
+new_protocol_optimized:
+	g++ -c ${NEW_PROTOCOL_ECC_SRC} ${STDFLAG} ${OPENSSL_INCLUDE}  ${GMP_INCLUDE}
 
 baseline_protocol:
 	g++ -c ${BASELINE_PROTOCOL_SRC} ${OPENSSL_INCLUDE} ${STDFLAG}

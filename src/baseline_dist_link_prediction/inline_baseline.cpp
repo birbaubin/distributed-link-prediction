@@ -96,7 +96,6 @@ void run_baseline_protocol_inline(vector<UndirectedEdge> evaluated_edges, unorde
              << size_of_ts << ","
              << score << "\n";
 
-
     }
 
 }
@@ -149,7 +148,6 @@ uint32_t psi_ca(vector<uint32_t> set1, vector<uint32_t> set2, prime_field* field
         mpz_init(encrypted_set1[i]);
         mpz_powm(encrypted_set1[i], g, tmp, p);
         mpz_powm(encrypted_set1[i], encrypted_set1[i], Rc_prime, p);
-
     }
 
 
