@@ -70,14 +70,18 @@ void run_baseline_protocol_inline(vector<UndirectedEdge> evaluated_edges, unorde
         int score = local1.size() + local2.size() + cross2 + cross1 - overlap;
 
 #ifdef DEBUG
-        cout << "Offline time1 " << offline_time1 << endl;
-        cout << "Offline time2 " << offline_time2 << endl;
-        cout << "Online time1 " << online_time1 << endl;
-        cout << "Online time2 " << online_time2 << endl;
 
-        cout << "ai " << size_of_ai << endl;
-        cout << "ai_prime " << size_of_ai_prime << endl;
-        cout << "ts " << size_of_ts << endl;
+        cout << "--- Results ---" << endl;
+        cout << "Score  : " <<  score << endl;
+
+        cout << "Offline time1 : " << offline_time1 << endl;
+        cout << "Offline time2 : " << offline_time2 << endl;
+        cout << "Online time1 :  " << online_time1 << endl;
+        cout << "Online time2 : " << online_time2 << endl;
+
+        cout << "Size of ai : " << size_of_ai << endl;
+        cout << "Size of ai_prime : " << size_of_ai_prime << endl;
+        cout << "Size of ts :" << size_of_ts << endl;
 
 #endif
 
@@ -93,22 +97,7 @@ void run_baseline_protocol_inline(vector<UndirectedEdge> evaluated_edges, unorde
              << score << "\n";
 
 
-//    cout << "--- Results ---" << endl;
-//    cout << "Score  : " <<  score << endl;
-
-//#ifdef DEBUG_TIME
-//    gettimeofday(&t_end, NULL);
-//    cout << "Time : " << std::setprecision(5) << getMillies(t_start, t_end) << " ms" << '\n';
-//
-//#endif
-
     }
-
-//    #ifdef DEBUG_TIME
-//    gettimeofday(&t_end, NULL);
-//    cout << "Time for all baseline predictions : " << std::setprecision(5)
-//                         << getMillies(t_protocol_start, t_end) << " ms" << '\n';
-//    #endif
 
 }
 
@@ -121,6 +110,11 @@ uint32_t psi_ca(vector<uint32_t> set1, vector<uint32_t> set2, prime_field* field
                 double* online_time1, double* online_time2, double* offline_time1, double* offline_time2,
                 size_t* ai, size_t* ai_prime, size_t* ts)
 {
+
+
+    //random generator for shuffling
+    std::random_device rd;
+    std::mt19937 generator(rd());
     
     uint32_t set1_size = set1.size();
     uint32_t set2_size = set2.size();
@@ -158,6 +152,7 @@ uint32_t psi_ca(vector<uint32_t> set1, vector<uint32_t> set2, prime_field* field
 
     }
 
+
     gettimeofday(&end, NULL);
     *offline_time1 = *offline_time1 + getMillies(start, end);
 
@@ -178,6 +173,10 @@ uint32_t psi_ca(vector<uint32_t> set1, vector<uint32_t> set2, prime_field* field
         mpz_powm(encrypted_set1[i], encrypted_set1[i], Rs_prime, p);
 
     }
+
+//    size_t size = sizeof(encrypted_set1) / sizeof(encrypted_set1[0]);
+    shuffle(encrypted_set1, encrypted_set1 + set1_size, generator);
+
     gettimeofday(&end, NULL);
     *online_time2 = *online_time2 + getMillies(start, end);
 
@@ -194,6 +193,8 @@ uint32_t psi_ca(vector<uint32_t> set1, vector<uint32_t> set2, prime_field* field
         mpz_powm(encrypted_set2[i], encrypted_set2[i], Rs_prime, p);
         sha256Hash(encrypted_set2[i], encrypted_set2[i]);
     }
+
+    shuffle(encrypted_set2, encrypted_set2 + set2_size, generator);
 
     gettimeofday(&end, NULL);
     *offline_time2 = *offline_time2 + getMillies(start, end);
@@ -256,6 +257,7 @@ size_t size_of_array(mpz_t* vec, int length)
         len+=(mpz_sizeinbase(vec[i], 2) / 8);
 
     return len;
+
 }
 
     
