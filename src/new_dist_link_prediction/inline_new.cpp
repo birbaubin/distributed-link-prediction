@@ -167,20 +167,21 @@ void run_new_protocol_inline(vector<UndirectedEdge> evaluated_edges, unordered_m
     metric << " ********************************" << endl;
 
 
+    //cryptographic parameters
     mpz_t alpha, beta, p, g;
-
     mpz_init_set(alpha, *((gmp_num*)field->get_rnd_num())->get_val());
     mpz_init_set(beta, *((gmp_num*)field->get_rnd_num())->get_val());
     mpz_init_set(g, *((gmp_num*)field->get_generator())->get_val());
     mpz_init_set(p, *((prime_field*)field)->get_p());
 
+    //random generator for shuffling
+    std::random_device rd;
+    std::mt19937 generator(rd());
 
     unordered_map<uint32_t, mpz_class > self_encryption_memory_1, self_encryption_memory_2;
     unordered_map<uint32_t, vector<mpz_class> > final_encryptions_1, final_encryptions_2;
 
     vector<uint32_t> treated_nodes;
-
-
 
     ofstream logs("logs/gmp-new-"+dataset_name);
     logs << "nodex,nodey,offline_time1,online_time1,offline_time2,online_time2,union_time,intersection_time,ai,bi,ai_prime,bi_prime,ci,di,score\n";
@@ -189,7 +190,6 @@ void run_new_protocol_inline(vector<UndirectedEdge> evaluated_edges, unordered_m
     for (size_t i = 0; i < evaluated_edges.size(); i++)
     {
 
-
         timeval t_start, t_end;
         double offline_time1 = 0;
         double offline_time2 = 0;
@@ -197,7 +197,6 @@ void run_new_protocol_inline(vector<UndirectedEdge> evaluated_edges, unordered_m
         double online_time2 = 0;
         double union_time = 0;
         double intersection_time = 0;
-
 
 
         uint32_t nodex = evaluated_edges.at(i).vertices[0];
@@ -274,7 +273,7 @@ void run_new_protocol_inline(vector<UndirectedEdge> evaluated_edges, unordered_m
                          beta, p);
 
             }
-
+            std::shuffle(encrypted_neighbors_nodex_1.begin(), encrypted_neighbors_nodex_1.end(), generator);
             size_of_ai_prime = size_of_vector(encrypted_neighbors_nodex_1);
 
 
@@ -286,7 +285,8 @@ void run_new_protocol_inline(vector<UndirectedEdge> evaluated_edges, unordered_m
             size_of_di = 0;
             size_of_bi_prime = 0;
         }
-        else{
+        else
+        {
             size_of_bi =  size_of_vector(encrypted_neighbors_nodey_1);
             size_of_di = size_of_vector(encrypted_neighbors_nodey_2);
 
@@ -298,6 +298,7 @@ void run_new_protocol_inline(vector<UndirectedEdge> evaluated_edges, unordered_m
                 total_number_encryptions++;
             }
 
+            std::shuffle(encrypted_neighbors_nodey_1.begin(), encrypted_neighbors_nodey_1.end(), generator);
             size_of_bi_prime = size_of_vector(encrypted_neighbors_nodey_1);
         }
 
@@ -317,6 +318,9 @@ void run_new_protocol_inline(vector<UndirectedEdge> evaluated_edges, unordered_m
                          alpha, p);
                 total_number_encryptions++;
             }
+
+            std::shuffle(encrypted_neighbors_nodex_2.begin(), encrypted_neighbors_nodex_2.end(), generator);
+
         }
 
         if(! nodey_already_treated)
@@ -328,6 +332,9 @@ void run_new_protocol_inline(vector<UndirectedEdge> evaluated_edges, unordered_m
                          alpha, p);
                 total_number_encryptions++;
             }
+
+            std::shuffle(encrypted_neighbors_nodey_2.begin(), encrypted_neighbors_nodey_2.end(), generator);
+
         }
 
 
@@ -378,7 +385,6 @@ void run_new_protocol_inline(vector<UndirectedEdge> evaluated_edges, unordered_m
              << size_of_ci << ","
              << size_of_di << ","
              << score << "\n";
-
 
 
         treated_nodes.push_back(nodex);
@@ -513,6 +519,10 @@ vector<mpz_class> get_encrypted_neighbors(unordered_map<uint32_t, mpz_class > *e
     vector<uint32_t> clear_neighbors;
     mpz_t element;
 
+    //random generator for shuffling
+    std::random_device rd;
+    std::mt19937 generator(rd());
+
 
     if(graph.find(node) != graph.end()) {
         clear_neighbors = graph.at(node);
@@ -545,6 +555,7 @@ vector<mpz_class> get_encrypted_neighbors(unordered_map<uint32_t, mpz_class > *e
 
     }
 
+    std::shuffle(encrypted_neighbors.begin(), encrypted_neighbors.end(), generator);
     return encrypted_neighbors;
 
 }
