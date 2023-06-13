@@ -110,8 +110,8 @@ void run_new_protocol_gmp(vector<UndirectedEdge> evaluated_edges, unordered_map<
             size_of_ai_prime = 0;
         }
         else{
-            size_of_ai = size_of_vector(encrypted_neighbors_nodex_1);
-            size_of_ci = size_of_vector(encrypted_neighbors_nodex_2);
+            size_of_ai = size_of_vector_of_mpz(encrypted_neighbors_nodex_1);
+            size_of_ci = size_of_vector_of_mpz(encrypted_neighbors_nodex_2);
 
             for (size_t i = 0; i < encrypted_neighbors_nodex_1.size(); i++)
             {
@@ -122,7 +122,7 @@ void run_new_protocol_gmp(vector<UndirectedEdge> evaluated_edges, unordered_map<
 
             }
             std::shuffle(encrypted_neighbors_nodex_1.begin(), encrypted_neighbors_nodex_1.end(), generator);
-            size_of_ai_prime = size_of_vector(encrypted_neighbors_nodex_1);
+            size_of_ai_prime = size_of_vector_of_mpz(encrypted_neighbors_nodex_1);
 
 
         }
@@ -135,8 +135,8 @@ void run_new_protocol_gmp(vector<UndirectedEdge> evaluated_edges, unordered_map<
         }
         else
         {
-            size_of_bi =  size_of_vector(encrypted_neighbors_nodey_1);
-            size_of_di = size_of_vector(encrypted_neighbors_nodey_2);
+            size_of_bi =  size_of_vector_of_mpz(encrypted_neighbors_nodey_1);
+            size_of_di = size_of_vector_of_mpz(encrypted_neighbors_nodey_2);
 
             for (size_t i = 0; i < encrypted_neighbors_nodey_1.size(); i++)
             {
@@ -147,7 +147,7 @@ void run_new_protocol_gmp(vector<UndirectedEdge> evaluated_edges, unordered_map<
             }
 
             std::shuffle(encrypted_neighbors_nodey_1.begin(), encrypted_neighbors_nodey_1.end(), generator);
-            size_of_bi_prime = size_of_vector(encrypted_neighbors_nodey_1);
+            size_of_bi_prime = size_of_vector_of_mpz(encrypted_neighbors_nodey_1);
         }
 
 
@@ -243,6 +243,7 @@ void run_new_protocol_gmp(vector<UndirectedEdge> evaluated_edges, unordered_map<
         final_encryptions_2.insert({nodex, encrypted_neighbors_nodex_2});
         final_encryptions_2.insert({nodey, encrypted_neighbors_nodey_2});
 
+
     }
 
     logs.close();
@@ -284,12 +285,6 @@ float compute_similarity_score(vector<mpz_class> encrypted_neighbors_nodex_1,
     mpz_union(array_enc_neighbors_nodex_1, encrypted_neighbors_nodex_1.size(),
               array_enc_neighbors_nodex_2, encrypted_neighbors_nodex_2.size(),
               encrypted_union_node1, &union_node1_size);
-
-//#ifdef DEBUG_STEPS
-//    gettimeofday(&t_end, NULL);
-//    cout << "Time for computing first union : " << std::setprecision(5) << getMillies(t_start, t_end) << " ms" << '\n';
-//    t_start = t_end;
-//#endif
 
 
     int union_node2_size = encrypted_neighbors_nodey_1.size() + encrypted_neighbors_nodey_2.size();
@@ -354,9 +349,18 @@ float compute_similarity_score(vector<mpz_class> encrypted_neighbors_nodex_1,
         score = (float)intersection_size/big_union_size;
     }
 
+
+    free_array_of_mpz(encrypted_union_node1, union_node1_size);
+    free_array_of_mpz(encrypted_union_node2, union_node2_size);
+    free_array_of_mpz(array_enc_neighbors_nodex_1, encrypted_neighbors_nodex_1.size());
+    free_array_of_mpz(array_enc_neighbors_nodex_2, encrypted_neighbors_nodex_2.size());
+    free_array_of_mpz(array_enc_neighbors_nodey_1, encrypted_neighbors_nodey_1.size());
+    free_array_of_mpz(array_enc_neighbors_nodey_2, encrypted_neighbors_nodey_2.size());
+
     return score;
 
 }
+
 
 vector<mpz_class> get_encrypted_neighbors(unordered_map<uint32_t, mpz_class > *encryption_memory,
                                           uint32_t node, unordered_map<uint32_t, vector<uint32_t>> graph, bool with_memory,
@@ -394,6 +398,7 @@ vector<mpz_class> get_encrypted_neighbors(unordered_map<uint32_t, mpz_class > *e
             }
 
             encrypted_neighbors.push_back(mpz_class(element));
+            mpz_clear(element);
         }
     }
     else
@@ -409,7 +414,7 @@ vector<mpz_class> get_encrypted_neighbors(unordered_map<uint32_t, mpz_class > *e
 }
 
 
-size_t size_of_vector(std::vector<mpz_class> vec)
+size_t size_of_vector_of_mpz(std::vector<mpz_class> vec)
 {
     if(vec.empty())
         return 0;

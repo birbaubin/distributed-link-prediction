@@ -1,4 +1,4 @@
-HELPERS_SRC=src/util/*.cpp
+HELPERS_SRC=src/util/data_loader.cpp src/util/ecc_utils.cpp src/util/gmp_utils.cpp src/util/graph_utils.cpp
 CRYPTO_SRC=src/util/crypto/*.cpp
 TESTS_SRC=src/tests/*.cpp
 LOCAL_PROTOCOL_SRC=src/local_link_prediction/local_protocol.cpp

@@ -117,7 +117,7 @@ uint32_t psi_ca(vector<uint32_t> set1, vector<uint32_t> set2, prime_field* field
     
     uint32_t set1_size = set1.size();
     uint32_t set2_size = set2.size();
-    mpz_t g, p, q, Rc_prime, Rs, Rs_prime, inv_Rc_prime, tmp;
+    mpz_t g, p, q, Rc_prime, Rs_prime, inv_Rc_prime, tmp;
     mpz_t encrypted_set1[set1_size];
     mpz_t encrypted_set2[set2_size];
 
@@ -154,7 +154,7 @@ uint32_t psi_ca(vector<uint32_t> set1, vector<uint32_t> set2, prime_field* field
     gettimeofday(&end, NULL);
     *offline_time1 = *offline_time1 + getMillies(start, end);
 
-    *ai = *ai + size_of_array(encrypted_set1, set1_size);
+    *ai = *ai + size_of_array_of_mpz(encrypted_set1, set1_size);
 
 
 #ifdef DEBUG_DATA
@@ -178,7 +178,7 @@ uint32_t psi_ca(vector<uint32_t> set1, vector<uint32_t> set2, prime_field* field
     gettimeofday(&end, NULL);
     *online_time2 = *online_time2 + getMillies(start, end);
 
-    *ai_prime = *ai_prime + size_of_array(encrypted_set1, set1_size);
+    *ai_prime = *ai_prime + size_of_array_of_mpz(encrypted_set1, set1_size);
 
 
     gettimeofday(&start, NULL);
@@ -197,7 +197,7 @@ uint32_t psi_ca(vector<uint32_t> set1, vector<uint32_t> set2, prime_field* field
     gettimeofday(&end, NULL);
     *offline_time2 = *offline_time2 + getMillies(start, end);
 
-    *ts = *ts + size_of_array(encrypted_set2, set2_size);
+    *ts = *ts + size_of_array_of_mpz(encrypted_set2, set2_size);
 
 
 
@@ -234,28 +234,13 @@ uint32_t psi_ca(vector<uint32_t> set1, vector<uint32_t> set2, prime_field* field
     mpz_clear(Rc_prime);
     mpz_clear(inv_Rc_prime);
 
-    for (size_t i = 0; i < set1_size; i++)
-    {
-        mpz_clear(encrypted_set1[i]);
-    }
-
-    for (size_t i = 0; i < set2_size; i++)
-    {
-        mpz_clear(encrypted_set2[i]);
-    }
+    free_array_of_mpz(encrypted_intersection, size_intersection);
+    free_array_of_mpz(encrypted_set1, set1_size);
+    free_array_of_mpz(encrypted_set2, set2_size);
 
     return size_intersection;
 
 }
 
-size_t size_of_array(mpz_t* vec, int length)
-{
-    size_t len = 0;
-    for(int i = 0; i < length; i++)
-        len+=(mpz_sizeinbase(vec[i], 2) / 8);
-
-    return len;
-
-}
 
     

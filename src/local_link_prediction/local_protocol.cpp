@@ -91,7 +91,7 @@ void run_local_protocol(vector<UndirectedEdge> evaluated_edges,  unordered_map<u
     cout << "******************************* Local protocol using metric " << metric << " *******************************" << endl;
 
     timeval t_start, t_end;
-    ofstream logs("logs/clear-"+dataset_name);
+    ofstream logs("logs/local-"+dataset_name);
     logs << "nodex,nodey,time,score\n";
 
 

@@ -106,3 +106,11 @@ std::vector<EC_POINT *> intersection_of_vectors(std::vector<EC_POINT *> &v1, std
 
     return intersection;
 }
+
+void free_vector_of_ecpoint(std::vector<EC_POINT*> *vec)
+{
+    for(int i = 0; i < vec->size(); i++)
+    {
+        EC_POINT_free(vec->at(i));
+    }
+}

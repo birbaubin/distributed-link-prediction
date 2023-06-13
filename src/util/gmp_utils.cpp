@@ -18,7 +18,7 @@ bool mpz_contains(mpz_t array[], int array_length, mpz_t element)
     
 }
 
-void mpz_union(mpz_t *first_array, int length_first_array,  
+void mpz_union(mpz_t *first_array, int length_first_array,
                 mpz_t *second_array, int length_second_array,  
                 mpz_t *result_array, int* length_result_array)
 {
@@ -62,6 +62,24 @@ void mpz_intersection(mpz_t first_array[], int length_first_array,
     *length_result_array = size;
     
 }
+
+size_t size_of_array_of_mpz(mpz_t* vec, int length)
+{
+    size_t len = 0;
+    for(int i = 0; i < length; i++)
+        len+=(mpz_sizeinbase(vec[i], 2) / 8);
+
+    return len;
+
+}
+
+
+void free_array_of_mpz(mpz_t * array, int size)
+{
+    for(int i = 0; i < size; i++)
+        mpz_clear(array[i]);
+}
+
 
 void sha256Hash(mpz_t result, const mpz_t value) {
     unsigned char hash[SHA256_DIGEST_LENGTH];

@@ -27,7 +27,5 @@ uint32_t psi_ca(vector<uint32_t> set1, vector<uint32_t> set2, prime_field* field
 
 uint32_t psi_ca2(vector<uint32_t> set1, vector<uint32_t> set2, prime_field* field, string description, int* n_encryptions);
 
-size_t size_of_array(mpz_t* vec, int length);
-
 
 #endif

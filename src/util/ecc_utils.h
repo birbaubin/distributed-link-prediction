@@ -23,6 +23,9 @@ std::vector<EC_POINT *> intersection_of_vectors(std::vector<EC_POINT *> &v1, std
 
 size_t size_of_vector(std::vector<EC_POINT*> vec, EC_GROUP* group, BN_CTX* ctx);
 
+void free_vector_of_ecpoint(std::vector<EC_POINT*> vec);
+
+
 
 
 #endif //DISTRIBUTED_LINK_PREDICTION_ECC_UTILS_H

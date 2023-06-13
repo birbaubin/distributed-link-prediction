@@ -1,5 +1,5 @@
-#ifndef NEW_PROTOCOL_H
-#define NEW_PROTOCOL_H
+#ifndef NEW_PROTOCOL_GMP_H
+#define NEW_PROTOCOL_GMP_H
 
 #include <time.h>
 #include <gmpxx.h>
@@ -18,9 +18,6 @@ void run_new_protocol_gmp(vector<UndirectedEdge> evaluated_edges, unordered_map<
                              unordered_map<uint32_t, vector<uint32_t> > graph2, pk_crypto* field, string metric, bool with_memory, string dataset_name);
 
 
-
-void run_local_protocol(vector<UndirectedEdge> evaluated_edges,  unordered_map<uint32_t, vector<uint32_t> > graph, string metric, string dataset_name);
-
 float compute_similarity_score(vector<mpz_class> encrypted_neighbors_nodex_1,
                                vector<mpz_class>  encrypted_neighbors_nodex_2,
                                vector<mpz_class>  encrypted_neighbors_nodey_1,
@@ -32,9 +29,7 @@ vector<mpz_class> get_encrypted_neighbors(unordered_map<uint32_t, mpz_class > *e
                                           mpz_t expo, mpz_t modulus, mpz_t g);
 
 
-size_t size_of_vector(std::vector<mpz_class> vec);
-
-void test();
+size_t size_of_vector_of_mpz(std::vector<mpz_class> vec);
 
 
 

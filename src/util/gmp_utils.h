@@ -21,5 +21,10 @@ bool mpz_contains(mpz_t array[], int array_length,  mpz_t element);
 void sha256Hash(mpz_t result, const mpz_t value);
 
 
+void free_array_of_mpz(mpz_t * array, int size);
+
+size_t size_of_array_of_mpz(mpz_t* vec, int length);
+
+
 
 #endif
