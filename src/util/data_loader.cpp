@@ -51,3 +51,50 @@ unordered_map<uint32_t, vector<uint32_t> > load_graph(std::string filename)
     return graph;
 
 }
+
+
+Eigen::MatrixXd load_graph_as_matrixxd(std::string filename, size_t dataset_size)
+{
+
+    Eigen::MatrixXd matrix = Eigen::MatrixXd::Zero(dataset_size+1, dataset_size+1);
+    uint32_t nlines = 0;
+    ifstream infile(filename.c_str());
+
+    if(!infile.good()) {
+        cerr << "Input file " << filename << " does not exist, program exiting!" << endl;
+        exit(0);
+    }
+
+    string line;
+    while(getline(infile, line))
+    {
+        nlines++;
+    }
+
+    infile.clear();
+    infile.seekg(ios::beg);
+
+    string source, target;
+
+    uint32_t i = 0;
+
+    while(getline(infile, line))
+    {
+        stringstream str(line);
+        std::getline(str, source, ',');
+        std::getline(str, target, ',');
+
+        uint32_t int_source = stol(source);
+        uint32_t int_target = stol(target);
+
+        matrix(int_source, int_target) = 1;
+        matrix(int_target, int_source) = 1;
+
+    }
+
+    return matrix;
+
+}
+
+
+

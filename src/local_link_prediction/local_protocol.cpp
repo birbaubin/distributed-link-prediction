@@ -157,4 +157,6 @@ void run_local_protocol(vector<UndirectedEdge> evaluated_edges,  unordered_map<u
 //                         << getMillies(t_protocol_start, t_end) << " ms" << '\n';
 //    #endif
 
+    logs.close();
+
 }

@@ -2,7 +2,7 @@
 #define FLAGS_H
 
 
-#define DEBUG
+//#define DEBUG
 
 
 

@@ -12,6 +12,7 @@
 #include "baseline_dist_link_prediction/baseline_protocol.h"
 #include "local_link_prediction/local_protocol.h"
 #include "util/parse_options.h"
+#include "svd/svd_decompose.h"
 
 using namespace std;
 

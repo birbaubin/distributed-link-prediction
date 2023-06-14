@@ -1,7 +1,7 @@
 HELPERS_SRC=src/util/data_loader.cpp src/util/ecc_utils.cpp src/util/gmp_utils.cpp src/util/graph_utils.cpp
 CRYPTO_SRC=src/util/crypto/*.cpp
 TESTS_SRC=src/tests/*.cpp
-LOCAL_PROTOCOL_SRC=src/local_link_prediction/local_protocol.cpp
+LOCAL_PROTOCOL_SRC=src/local_link_prediction/local_protocol.cpp src/svd/svd_decompose.cpp
 NEW_PROTOCOL_ECC_SRC=src/new_dist_link_prediction_ecc/new_protocol_ecc.cpp
 NEW_PROTOCOL_GMP_SRC=src/new_dist_link_prediction_gmp/new_protocol_gmp.cpp
 BASELINE_PROTOCOL_SRC=src/baseline_dist_link_prediction/inline_baseline.cpp

@@ -10,10 +10,10 @@ int main(int argc, char** argv)
     int p_type = 0, secparam=0, expo_type=0, dataset=0;
 
     parsing_ctx options[] = {
-			{(void*) &p_type, T_NUM, 'p', "Protocol type(baseline=0, new protocol=1)", true, false},
-			{(void*) &expo_type, T_NUM, 'e', "Cryptographic expo(GMP,ECC)", true, false},
+			{(void*) &p_type, T_NUM, 'p', "Protocol type(local(clear)=0, baseline=1, new=2,svd=3)", true, false},
+			{(void*) &expo_type, T_NUM, 'e', "Cryptographic expo(GMP=0,,ECC=1)", true, false},
 			{(void*) &secparam, T_NUM, 's', "Symmetric Security Bits (default: 128)", false, false},
-            {(void*) &dataset, T_NUM, 'd', "Dataset (flickr, acm, polblogs)", false, false},
+            {(void*) &dataset, T_NUM, 'd', "Dataset (polblogs=0, acm=1, flickr=2)", false, false},
 
     };
 
@@ -57,6 +57,9 @@ int main(int argc, char** argv)
                 run_new_protocol_gmp(evaluated_graph, graph1, graph2, field, "neighbors", true, dataset_name);
             else
                 run_new_protocol_ecc(evaluated_graph, graph1, graph2, "neighbors", true, dataset_name);
+        case 3:
+            make_svd("datasets/net1-"+dataset_name, selected_nodes.size());
+            make_svd("datasets/net2-"+dataset_name, selected_nodes.size());
 
     }
 
