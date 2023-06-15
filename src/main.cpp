@@ -69,4 +69,34 @@ int main(int argc, char** argv)
 	return 1;
 }
 
-
+//int main(int argc, char** argv)
+//{
+//    const int symsecbits = 128;
+//    const int number_of_selected_nodes = 100;
+//
+//    crypto crypto(symsecbits);
+//    pk_crypto* field = crypto.gen_field((field_type)0);
+//
+//    string datasets[] = {"polblogs.csv", "acm.csv", "flickr.csv"};
+//    string dataset_name = "email.csv";
+////
+//    string network1_name = "datasets/net1-"+dataset_name;
+//    string network2_name = "datasets/net2-"+dataset_name;
+//
+//    unordered_map<uint32_t, vector<uint32_t> > graph1 = load_graph(network1_name);
+//    unordered_map<uint32_t, vector<uint32_t> > graph2 = load_graph(network2_name);
+//    unordered_map<uint32_t, vector<uint32_t> > groundtruth = load_graph("datasets/"+dataset_name);
+//
+//
+//    vector<uint32_t> selected_nodes = get_nodes_of_graph(groundtruth);
+//
+//
+//    vector<UndirectedEdge> evaluated_graph = generate_complete_graph(selected_nodes);
+//
+//    run_new_protocol_ecc(evaluated_graph, graph1, graph2, "neighbors", false, dataset_name);
+//    run_new_protocol_gmp(evaluated_graph, graph1, graph2, field,"neighbors", false, dataset_name);
+//
+//
+//    return 1;
+//}
+//

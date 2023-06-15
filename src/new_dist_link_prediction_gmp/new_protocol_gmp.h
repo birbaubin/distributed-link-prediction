@@ -22,7 +22,7 @@ float compute_similarity_score(vector<mpz_class> encrypted_neighbors_nodex_1,
                                vector<mpz_class>  encrypted_neighbors_nodex_2,
                                vector<mpz_class>  encrypted_neighbors_nodey_1,
                                vector<mpz_class>  encrypted_neighbors_nodey_2,
-                               string metric);
+                               string metric, double* union_time, double* intersection_time);
 
 vector<mpz_class> get_encrypted_neighbors(unordered_map<uint32_t, mpz_class > *encryption_memory,
                                           uint32_t node, unordered_map<uint32_t, vector<uint32_t>> graph, bool with_memory,

@@ -41,49 +41,9 @@ size_t size_of_vector(std::vector<EC_POINT*> vec, EC_GROUP* group, BN_CTX* ctx)
     return len*vec.size();
 }
 
-//struct EcPointComparator {
-//    EC_GROUP *group;
-//    point_conversion_form_t form;
-//
-//    EcPointComparator(EC_GROUP *group, point_conversion_form_t form) : group(group), form(form) {}
-//
-//    bool operator()(const EC_POINT *a, const EC_POINT *b) const {
-//        unsigned char *a_oct, *b_oct;
-////        size_t a_len, b_len;
-//
-////        a_len = EC_POINT_point2oct(group, a, form, NULL, 0, NULL);
-//        a_oct = (unsigned char *)malloc(SIZE_OF_POINT);
-//        EC_POINT_point2oct(group, a, form, a_oct, SIZE_OF_POINT, NULL);
-//
-////        b_len = EC_POINT_point2oct(group, b, form, NULL, 0, NULL);
-//        b_oct = (unsigned char *)malloc(SIZE_OF_POINT);
-//        EC_POINT_point2oct(group, b, form, b_oct, SIZE_OF_POINT, NULL);
-//
-//        int cmp = memcmp(a_oct, b_oct, SIZE_OF_POINT);
-//
-////        cout << "a_len = " << a_len << endl;
-////        cout << "b_len = " << b_len << endl;
-//
-//        free(a_oct);
-//        free(b_oct);
-//
-//        if (cmp == 0) {
-//            return false;
-//        } else {
-//            return cmp < 0;
-//        }
-//    }
-//};
 
 std::vector<EC_POINT *> intersection_of_vectors(std::vector<EC_POINT *> &v1, std::vector<EC_POINT *> &v2, EC_GROUP *group, BN_CTX *ctx) {
-//    std::vector<EC_POINT *> v3;
-//
-//    std::sort(v1.begin(), v1.end(), EcPointComparator(group, POINT_CONVERSION_UNCOMPRESSED));
-//    std::sort(v2.begin(), v2.end(), EcPointComparator(group, POINT_CONVERSION_UNCOMPRESSED));
-//
-//    std::set_intersection(v1.begin(),v1.end(),v2.begin(),v2.end(),std::back_inserter(v3), EcPointComparator(group, POINT_CONVERSION_UNCOMPRESSED));
-//
-//    return v3;
+
 
     std::set<std::vector<unsigned char>> pointSet;
     std::vector<EC_POINT*> intersection;
@@ -113,4 +73,48 @@ void free_vector_of_ecpoint(std::vector<EC_POINT*> *vec)
     {
         EC_POINT_free(vec->at(i));
     }
+}
+
+bool ecc_contains(std::vector<EC_POINT*> vec, EC_POINT *element, EC_GROUP* group, BN_CTX* ctx)
+{
+    bool found = false;
+
+    for (size_t i = 0; i < vec.size(); i++)
+    {
+        if(EC_POINT_cmp(group, vec.at(i), element, ctx) == 0){
+            found = true;
+            break;
+        }
+    }
+
+    return found;
+
+}
+
+std::vector<EC_POINT*> ecc_union(std::vector<EC_POINT*> vec1, std::vector<EC_POINT*> vec2, EC_GROUP* group, BN_CTX* ctx)
+{
+
+    for (EC_POINT* point: vec2)
+    {
+        // cout << "DEBUg before if" << endl;
+        if(!ecc_contains(vec1, point, group, ctx))
+            vec1.push_back(point);
+    }
+
+    return vec1;
+
+}
+
+std::vector<EC_POINT*> ecc_intersection(std::vector<EC_POINT*> vec1, std::vector<EC_POINT*> vec2, EC_GROUP* group, BN_CTX* ctx)
+{
+
+    std::vector<EC_POINT*> result;
+    for (EC_POINT* point: vec1)
+    {
+        if(ecc_contains(vec2, point, group, ctx))
+            result.push_back(point);
+    }
+
+    return result;
+
 }

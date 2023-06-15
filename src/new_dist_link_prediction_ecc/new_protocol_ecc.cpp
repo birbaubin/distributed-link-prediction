@@ -222,10 +222,10 @@ void run_new_protocol_ecc(vector<UndirectedEdge> evaluated_edges, unordered_map<
 
         gettimeofday(&t_start, NULL);
 
-        vector<EC_POINT*> neighbors_nodex = union_of_vectors(encrypted_neighbors_nodex_graph1, encrypted_neighbors_nodex_graph2, group, ctx);
+        vector<EC_POINT*> neighbors_nodex = ecc_union(encrypted_neighbors_nodex_graph1, encrypted_neighbors_nodex_graph2, group, ctx);
 //        cout << "Size of union1 : " << neighbors_nodex.size() << endl;
 
-        vector<EC_POINT*> neighbors_nodey = union_of_vectors(encrypted_neighbors_nodey_graph1, encrypted_neighbors_nodey_graph2, group, ctx);
+        vector<EC_POINT*> neighbors_nodey = ecc_union(encrypted_neighbors_nodey_graph1, encrypted_neighbors_nodey_graph2, group, ctx);
 //        cout << "Size of union2 : " << neighbors_nodey.size() << endl;
 
         gettimeofday(&t_end, NULL);
@@ -234,7 +234,7 @@ void run_new_protocol_ecc(vector<UndirectedEdge> evaluated_edges, unordered_map<
         union_time = union_time + duration;
 
         gettimeofday(&t_start, NULL);
-        vector<EC_POINT*> common_neighbors = intersection_of_vectors(neighbors_nodex, neighbors_nodey, group, ctx);
+        vector<EC_POINT*> common_neighbors = ecc_intersection(neighbors_nodex, neighbors_nodey, group, ctx);
         gettimeofday(&t_end, NULL);
         duration = getMillies(t_start, t_end);
         online_time1 = online_time1 + duration;
@@ -252,7 +252,10 @@ void run_new_protocol_ecc(vector<UndirectedEdge> evaluated_edges, unordered_map<
              << online_time1 << " ms" << '\n';
         cout << "Online time graph2 : " << std::setprecision(5)
              << online_time2 << " ms" << '\n';
-
+        cout << "Union time : " << std::setprecision(5)
+             << union_time << " ms" << '\n';
+        cout << "Intersection time : " << std::setprecision(5)
+             << intersection_time << " ms" << '\n';
 
         cout << "Size of ai : "<< size_of_ai << endl;
         cout << "Size of bi : "<< size_of_bi << endl;
@@ -285,7 +288,6 @@ void run_new_protocol_ecc(vector<UndirectedEdge> evaluated_edges, unordered_map<
         {
             treated_nodes.push_back(nodex);
             treated_nodes.push_back(nodey);
-
             final_encryptions_1.insert({nodex, encrypted_neighbors_nodex_graph1});
             final_encryptions_1.insert({nodey, encrypted_neighbors_nodey_graph1});
             final_encryptions_2.insert({nodex, encrypted_neighbors_nodex_graph2});

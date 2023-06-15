@@ -25,7 +25,11 @@ size_t size_of_vector(std::vector<EC_POINT*> vec, EC_GROUP* group, BN_CTX* ctx);
 
 void free_vector_of_ecpoint(std::vector<EC_POINT*> vec);
 
+bool ecc_contains(std::vector<EC_POINT*> vec, EC_POINT *element, EC_GROUP* group, BN_CTX* ctx);
 
+std::vector<EC_POINT*> ecc_intersection(std::vector<EC_POINT*> vec1, std::vector<EC_POINT*> vec2, EC_GROUP* group, BN_CTX* ctx);
+
+std::vector<EC_POINT*> ecc_union(std::vector<EC_POINT*> vec1, std::vector<EC_POINT*> vec2, EC_GROUP* group, BN_CTX* ctx);
 
 
 #endif //DISTRIBUTED_LINK_PREDICTION_ECC_UTILS_H

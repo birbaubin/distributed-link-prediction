@@ -124,7 +124,6 @@ void run_new_protocol_gmp(vector<UndirectedEdge> evaluated_edges, unordered_map<
             std::shuffle(encrypted_neighbors_nodex_1.begin(), encrypted_neighbors_nodex_1.end(), generator);
             size_of_ai_prime = size_of_vector_of_mpz(encrypted_neighbors_nodex_1);
 
-
         }
 
         if(nodey_already_treated)
@@ -186,7 +185,9 @@ void run_new_protocol_gmp(vector<UndirectedEdge> evaluated_edges, unordered_map<
         }
 
 
-        float score = compute_similarity_score(encrypted_neighbors_nodex_1, encrypted_neighbors_nodex_2, encrypted_neighbors_nodey_1, encrypted_neighbors_nodey_2, metric);
+        float score = compute_similarity_score(encrypted_neighbors_nodex_1, encrypted_neighbors_nodex_2,
+                                               encrypted_neighbors_nodey_1, encrypted_neighbors_nodey_2,
+                                               metric, &union_time, &intersection_time);
 
         gettimeofday(&t_end, NULL);
         online_time1 = online_time1 + getMillies(t_start, t_end);
@@ -254,8 +255,13 @@ float compute_similarity_score(vector<mpz_class> encrypted_neighbors_nodex_1,
                               vector<mpz_class>  encrypted_neighbors_nodex_2,
                               vector<mpz_class>  encrypted_neighbors_nodey_1,
                               vector<mpz_class>  encrypted_neighbors_nodey_2,
-                              string metric )
+                              string metric,
+                              double* union_time,
+                              double* intersection_time)
 {
+
+    timeval t_start, t_end;
+    gettimeofday(&t_start, NULL);
     int union_node1_size = encrypted_neighbors_nodex_1.size() + encrypted_neighbors_nodex_2.size();
 
     mpz_t encrypted_union_node1[union_node1_size];
@@ -287,6 +293,7 @@ float compute_similarity_score(vector<mpz_class> encrypted_neighbors_nodex_1,
               encrypted_union_node1, &union_node1_size);
 
 
+
     int union_node2_size = encrypted_neighbors_nodey_1.size() + encrypted_neighbors_nodey_2.size();
     mpz_t encrypted_union_node2[union_node2_size];
 
@@ -316,11 +323,10 @@ float compute_similarity_score(vector<mpz_class> encrypted_neighbors_nodex_1,
               array_enc_neighbors_nodey_2, encrypted_neighbors_nodey_2.size(),
               encrypted_union_node2, &union_node2_size);
 
-//#ifdef DEBUG_STEPS
-//    gettimeofday(&t_end, NULL);
-//    cout << "Time for computing second union : " << std::setprecision(5) << getMillies(t_start, t_end) << " ms" << '\n';
-//    t_start = t_end;
-//#endif
+
+    gettimeofday(&t_end, NULL);
+    *union_time = *union_time + getMillies(t_start, t_end);
+    t_start = t_end;
 
     float score = 0;
     int intersection_size = union_node2_size;
@@ -329,6 +335,9 @@ float compute_similarity_score(vector<mpz_class> encrypted_neighbors_nodex_1,
     mpz_intersection(encrypted_union_node1, union_node1_size,
                      encrypted_union_node2, union_node2_size,
                      encrypted_intersection, &intersection_size);
+    gettimeofday(&t_end, NULL);
+    *intersection_time = *intersection_time + getMillies(t_start, t_end);
+
 
     if(metric == "neighbors") score = intersection_size;
     else if (metric == "cosine")
