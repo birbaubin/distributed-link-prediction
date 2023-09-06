@@ -51,7 +51,7 @@ void run_new_protocol_ecc(vector<UndirectedEdge> evaluated_edges, unordered_map<
 
     vector<uint32_t> treated_nodes;
 
-    ofstream logs("logs/ecc-"+dataset_name);
+    ofstream logs("logs/ecc-new-"+dataset_name);
     logs << "nodex,nodey,offline_time1,online_time1,offline_time2,online_time2,union_time,intersection_time,ai,bi,ai_prime,bi_prime,ci,di,score\n";
 
 
@@ -134,7 +134,7 @@ void run_new_protocol_ecc(vector<UndirectedEdge> evaluated_edges, unordered_map<
             size_of_ai = 0;
             size_of_ci = 0;
             size_of_ai_prime = 0;
-            cout << "Node x already treated " << endl;
+//            cout << "Node x already treated " << endl;
 
         }
         else{
@@ -149,7 +149,6 @@ void run_new_protocol_ecc(vector<UndirectedEdge> evaluated_edges, unordered_map<
             }
             std::shuffle(encrypted_neighbors_nodex_graph1.begin(), encrypted_neighbors_nodex_graph1.end(), generator);
             size_of_ai_prime = size_of_vector(encrypted_neighbors_nodex_graph1, group, ctx);
-
 
         }
 
@@ -168,7 +167,7 @@ void run_new_protocol_ecc(vector<UndirectedEdge> evaluated_edges, unordered_map<
             size_of_bi = 0;
             size_of_di = 0;
             size_of_bi_prime = 0;
-            cout << "Node y already treated " << endl;
+//            cout << "Node y already treated " << endl;
         }
         else
         {

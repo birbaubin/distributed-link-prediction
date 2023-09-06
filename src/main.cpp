@@ -7,13 +7,15 @@ int main(int argc, char** argv)
 {
 
 
-    int p_type = 0, secparam=0, expo_type=0, dataset=0;
+    int p_type = 0, secparam=0, expo_type=0, dataset=0, expe_type = 0;
 
     parsing_ctx options[] = {
 			{(void*) &p_type, T_NUM, 'p', "Protocol type(local(clear)=0, baseline=1, new=2,svd=3)", true, false},
 			{(void*) &expo_type, T_NUM, 'e', "Cryptographic expo(GMP=0,,ECC=1)", true, false},
 			{(void*) &secparam, T_NUM, 's', "Symmetric Security Bits (default: 128)", false, false},
             {(void*) &dataset, T_NUM, 'd', "Dataset (polblogs=0, acm=1, flickr=2)", false, false},
+            {(void*) &expe_type, T_NUM, 't', "Experiment type(0=complete graph, 1=star graph, 2=1 vs 1", true, false},
+
 
     };
 
@@ -42,7 +44,23 @@ int main(int argc, char** argv)
 
     vector<uint32_t> selected_nodes = get_nodes_of_graph(groundtruth);
 
-    vector<UndirectedEdge> evaluated_graph = generate_complete_graph(selected_nodes);
+    vector<UndirectedEdge> evaluated_graph;
+
+    switch (expe_type) {
+        case 0:
+            evaluated_graph = generate_complete_graph(selected_nodes);
+            break;
+        case 1:
+            evaluated_graph = generate_star_graph(selected_nodes);
+            break;
+        case 2:
+            srand(static_cast<unsigned int>(time(nullptr)));
+            uint32_t random_node_1 = selected_nodes.at(rand() % selected_nodes.size());
+            uint32_t random_node_2 = selected_nodes.at(rand() % selected_nodes.size());
+
+            vector<uint32_t> random_nodes = {random_node_1, random_node_2};
+            evaluated_graph = generate_complete_graph(random_nodes);
+    }
 
     switch (p_type) {
         case 0:
@@ -54,17 +72,15 @@ int main(int argc, char** argv)
             break;
         case 2:
             if(expo_type == 0)
-                run_new_protocol_gmp(evaluated_graph, graph1, graph2, field, "neighbors", true, dataset_name);
+                run_new_protocol_gmp(evaluated_graph, graph1, graph2, field, "neighbors", false, dataset_name);
             else
-                run_new_protocol_ecc(evaluated_graph, graph1, graph2, "neighbors", true, dataset_name);
+                run_new_protocol_ecc(evaluated_graph, graph1, graph2, "neighbors", false, dataset_name);
+            break;
         case 3:
-            make_svd("datasets/net1-"+dataset_name, selected_nodes.size());
-            make_svd("datasets/net2-"+dataset_name, selected_nodes.size());
-
+            compute_svd("datasets/net1-"+dataset_name, selected_nodes.size());
+            compute_svd("datasets/net2-"+dataset_name, selected_nodes.size());
+            break;
     }
-
-
-
 
 	return 1;
 }

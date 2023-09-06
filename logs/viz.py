@@ -12,9 +12,9 @@ def convert_ms_to_hms(milliseconds):
 
 LOGS_PATH = "/Users/aubinbirba/Works/distributed-link-prediction/logs/"
 PROTOCOL_TYPE="new"
-EXPO="gmp"
+EXPO="ecc"
 
-DATASET_NAME="polblogs.csv"
+DATASET_NAME="acm.csv"
 results = pd.read_csv(LOGS_PATH+EXPO+"-"+PROTOCOL_TYPE+"-"+DATASET_NAME)
 
 if PROTOCOL_TYPE != "clear":

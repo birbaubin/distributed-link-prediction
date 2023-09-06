@@ -7,7 +7,7 @@
 using namespace std;
 
 
-void make_svd(string dataset_name, size_t dataset_size)
+void compute_svd(string dataset_name, size_t dataset_size)
 {
     timeval t_start, t_end;
     gettimeofday(&t_start, NULL);

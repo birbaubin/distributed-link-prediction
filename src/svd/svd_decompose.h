@@ -16,6 +16,6 @@
 using namespace std;
 
 
-void make_svd(string dataset_name, size_t dataset_size);
+void compute_svd(string dataset_name, size_t dataset_size);
 
 #endif //DISTRIBUTED_LINK_PREDICTION_SVD_DECOMPOSE_H

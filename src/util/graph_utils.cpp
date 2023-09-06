@@ -164,4 +164,28 @@ vector<UndirectedEdge> generate_complete_graph(vector<uint32_t> nodes)
     
 }
 
+vector<UndirectedEdge> generate_star_graph(vector<uint32_t> nodes)
+{
+    vector<UndirectedEdge> graph;
+
+    // Seed the random number generator
+    srand(static_cast<unsigned int>(time(nullptr)));
+
+    // Randomly select a node from the nodes vector
+    uint32_t random_node = nodes.at(rand() % nodes.size());
+
+    for (size_t i = 0; i < nodes.size(); i++)
+    {
+        if (nodes.at(i) != random_node)  // Avoid creating an edge from the node to itself
+        {
+            UndirectedEdge edge;
+            edge.vertices[0] = random_node;
+            edge.vertices[1] = nodes.at(i);
+            graph.push_back(edge);
+        }
+    }
+
+    return graph;
+}
+
 

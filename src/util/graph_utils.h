@@ -34,4 +34,6 @@ vector<UndirectedEdge> generate_complete_graph(vector<uint32_t> nodes);
 
 vector<uint32_t> get_nodes_of_graph(unordered_map<uint32_t, vector<uint32_t > > graph);
 
+vector<UndirectedEdge> generate_star_graph(vector<uint32_t> nodes);
+
 #endif
