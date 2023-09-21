@@ -1,4 +1,5 @@
 import pandas as pd
+import os
 
 def convert_ms_to_hms(milliseconds):
     millies = milliseconds%1000
@@ -10,12 +11,15 @@ def convert_ms_to_hms(milliseconds):
 
 
 
-LOGS_PATH = "/Users/aubinbirba/Works/distributed-link-prediction/logs/"
+LOGS_PATH = os.path.abspath(os.path.dirname(__file__))
+
+print(LOGS_PATH)
+
 PROTOCOL_TYPE="new"
 EXPO="ecc"
 
 DATASET_NAME="acm.csv"
-results = pd.read_csv(LOGS_PATH+EXPO+"-"+PROTOCOL_TYPE+"-"+DATASET_NAME)
+results = pd.read_csv(f"{LOGS_PATH}/one_vs_one_new.csv")
 
 if PROTOCOL_TYPE != "clear":
     times = ["offline_time1", "offline_time2", "online_time1", "online_time2"]
