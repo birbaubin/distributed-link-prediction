@@ -3,7 +3,8 @@
 using namespace std;
 
 void run_new_protocol_ecc(vector<UndirectedEdge> evaluated_edges, unordered_map<uint32_t, vector<uint32_t> > graph1,
-                             unordered_map<uint32_t, vector<uint32_t> > graph2, string metric, bool with_memory, string dataset_name)
+                             unordered_map<uint32_t, vector<uint32_t> > graph2, string metric, bool with_memory, string dataset_name,
+                             string expe_type)
 {
 
     string memory_str = with_memory ? " with memory ": " without memory ";
@@ -51,8 +52,22 @@ void run_new_protocol_ecc(vector<UndirectedEdge> evaluated_edges, unordered_map<
 
     vector<uint32_t> treated_nodes;
 
-    ofstream logs("logs/ecc-new-"+dataset_name);
-    logs << "nodex,nodey,offline_time1,online_time1,offline_time2,online_time2,union_time,intersection_time,ai,bi,ai_prime,bi_prime,ci,di,score\n";
+    ofstream logs;
+    if(expe_type == "complete" or expe_type == "star"){
+        logs.open("logs/ecc-new-"+expe_type+"-"+dataset_name);
+        logs << "nodex,nodey,offline_time1,online_time1,offline_time2,online_time2,union_time,intersection_time,ai,bi,ai_prime,bi_prime,ci,di,score\n";
+
+    }
+    else if (expe_type == "single"){
+        string current_log_state;
+        ifstream input_logs("logs/ecc-new-"+expe_type+"-"+dataset_name);
+        logs.open("logs/ecc-new-"+expe_type+"-"+dataset_name, std::ios_base::app);
+
+        if(!getline(input_logs, current_log_state)){
+            logs << "nodex,nodey,offline_time1,online_time1,offline_time2,online_time2,union_time,intersection_time,ai,bi,ai_prime,bi_prime,ci,di,score\n";
+        }
+
+    }
 
 
     for (size_t i = 0; i < evaluated_edges.size(); i++)

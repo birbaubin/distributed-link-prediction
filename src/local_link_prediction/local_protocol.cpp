@@ -12,6 +12,8 @@ void run_clear_protocol(vector<UndirectedEdge> evaluated_edges,  unordered_map<u
     cout << "******************************* Cleartext protocol between node using metric " << metric << " *******************************" << endl;
 
     timeval t_start, t_end;
+
+
     ofstream logs("logs/clear-"+dataset_name);
     logs << "nodex,nodey,time,score\n";
 
@@ -85,14 +87,31 @@ void run_clear_protocol(vector<UndirectedEdge> evaluated_edges,  unordered_map<u
 }
 
 
-void run_local_protocol(vector<UndirectedEdge> evaluated_edges,  unordered_map<uint32_t, vector<uint32_t> > graph, string metric, string dataset_name)
+void run_local_protocol(vector<UndirectedEdge> evaluated_edges,  unordered_map<uint32_t, vector<uint32_t> > graph, string metric,
+                        string dataset_name, string expe_type)
 {
 
     cout << "******************************* Local protocol using metric " << metric << " *******************************" << endl;
 
     timeval t_start, t_end;
-    ofstream logs("logs/local-"+dataset_name);
-    logs << "nodex,nodey,time,score\n";
+
+    ofstream logs;
+    if(expe_type == "complete" or expe_type == "star"){
+        logs.open("logs/local-"+expe_type+"-"+dataset_name);
+        logs << "nodex,nodey,time,score\n";
+
+    }
+    else if (expe_type == "single"){
+        string current_log_state;
+        ifstream input_logs("logs/local-"+expe_type+"-"+dataset_name);
+        logs.open("logs/local-"+expe_type+"-"+dataset_name, std::ios_base::app);
+
+        if(!getline(input_logs, current_log_state)){
+            logs << "nodex,nodey,time,score\n";
+        }
+
+    }
+
 
 
     for (size_t i = 0; i < evaluated_edges.size(); i++)

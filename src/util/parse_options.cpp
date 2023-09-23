@@ -8,7 +8,7 @@ void print_usage(std::string progname, parsing_ctx* options, uint32_t nops) {
 	for (i = 0; i < nops; i++) {
 		std::cout << " -" << options[i].opt_name << " [" << options[i].help_str << (options[i].required ? ", required" : ", optional") << "]" << std::endl;
 	}
-	std::cout << std::endl << "Program exiting" << std::endl;
+	std::cout << std::endl << "Exiting." << std::endl;
 }
 
 

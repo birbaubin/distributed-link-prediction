@@ -25,7 +25,8 @@
 
 
 void run_new_protocol_ecc(vector<UndirectedEdge> evaluated_edges, unordered_map<uint32_t, vector<uint32_t>> graph1,
-                             unordered_map<uint32_t, vector<uint32_t>> graph2, string metric, bool with_memory, string dataset_name);
+                             unordered_map<uint32_t, vector<uint32_t>> graph2, string metric, bool with_memory, string dataset_name,
+                             string expe_type);
 
 //float compute_similarity_score(vector<mpz_class> encrypted_neighbors_nodex_1,
 //                               vector<mpz_class>  encrypted_neighbors_nodex_2,

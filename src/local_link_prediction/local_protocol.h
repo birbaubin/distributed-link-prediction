@@ -18,9 +18,11 @@
 using namespace std;
 
 void run_clear_protocol(vector<UndirectedEdge> evaluated_edges,  unordered_map<uint32_t, vector<uint32_t> > graph1,
-                        unordered_map<uint32_t, vector<uint32_t> > graph2, string metric, string dataset_name);
+                        unordered_map<uint32_t, vector<uint32_t> > graph2, string metric, string dataset_name,
+                        string expe_type);
 
-void run_local_protocol(vector<UndirectedEdge> evaluated_edges,  unordered_map<uint32_t, vector<uint32_t> > graph, string metric, string dataset_name);
+void run_local_protocol(vector<UndirectedEdge> evaluated_edges,  unordered_map<uint32_t, vector<uint32_t> > graph,
+                        string metric, string dataset_name, string expe_type);
 
 
 #endif //DISTRIBUTED_LINK_PREDICTION_LOCAL_PROTOCOL_H

@@ -51,7 +51,7 @@ int main(int argc, char** argv)
    if(expe_type == "complete"){
        evaluated_graph = generate_complete_graph(selected_nodes);
    }
-   else if(expe_type == "start"){
+   else if(expe_type == "star"){
        evaluated_graph = generate_star_graph(selected_nodes);
    }
    else if (expe_type == "single"){
@@ -67,20 +67,18 @@ int main(int argc, char** argv)
 
    }
 
-
    // select right function according to desired experiment
    if (protocol_type == "local"){
-       run_local_protocol(evaluated_graph, graph1, "neighbors", "net1-" + dataset_name);
-       run_local_protocol(evaluated_graph, graph2, "neighbors", "net1-" + dataset_name);
+       run_local_protocol(evaluated_graph, graph1, "neighbors", "net1-" + dataset_name, expe_type);
    }
     else if (protocol_type == "baseline") {
-       run_baseline_protocol_inline(evaluated_graph, graph1, graph2, field, dataset_name);
+       run_baseline_protocol_inline(evaluated_graph, graph1, graph2, field, dataset_name, expe_type);
     }
     else if (protocol_type == "new") {
        if (expo_type == "gmp")
-           run_new_protocol_gmp(evaluated_graph, graph1, graph2, field, "neighbors", false, dataset_name);
+           run_new_protocol_gmp(evaluated_graph, graph1, graph2, field, "neighbors", false, dataset_name, expe_type);
        else
-           run_new_protocol_ecc(evaluated_graph, graph1, graph2, "neighbors", false, dataset_name);
+           run_new_protocol_ecc(evaluated_graph, graph1, graph2, "neighbors", false, dataset_name, expe_type);
     }
     else if(protocol_type == "svd"){
             compute_svd("datasets/net1-"+dataset_name, selected_nodes.size());

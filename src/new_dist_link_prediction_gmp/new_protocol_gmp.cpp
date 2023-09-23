@@ -2,11 +2,23 @@
 
 using namespace std;
 
-
+/**
+ * Run the protocol using GMP for exponentiations
+ *
+ * @param evaluated_edges links that we are trying to predict
+ * @param graph1 first graph
+ * @param graph2 second graph
+ * @param field crypto field
+ * @param metric computed link prediction metric (common neighbors, jaccard or cosine)
+ * @param with_memory whether we cache encryptions or not
+ * @param dataset_name dataset name for display and logs
+ * @param expe_type type of experiment (complete graph, star graph of single link) for display and logs
+ */
 
 
 void run_new_protocol_gmp(vector<UndirectedEdge> evaluated_edges, unordered_map<uint32_t, vector<uint32_t> > graph1,
-                             unordered_map<uint32_t, vector<uint32_t> > graph2, pk_crypto* field, string metric, bool with_memory, string dataset_name)
+                             unordered_map<uint32_t, vector<uint32_t> > graph2, pk_crypto* field, string metric, bool with_memory,
+                             string dataset_name, string expe_type)
 {
 
     string memory_str = with_memory ? " with memory ": " without memory ";
@@ -26,13 +38,30 @@ void run_new_protocol_gmp(vector<UndirectedEdge> evaluated_edges, unordered_map<
     std::random_device rd;
     std::mt19937 generator(rd());
 
+
+    //caches for node encryptions
     unordered_map<uint32_t, mpz_class > self_encryption_memory_1, self_encryption_memory_2;
     unordered_map<uint32_t, vector<mpz_class> > final_encryptions_1, final_encryptions_2;
 
+    //already explored nodes
     vector<uint32_t> treated_nodes;
 
-    ofstream logs("logs/gmp-new-"+dataset_name);
-    logs << "nodex,nodey,offline_time1,online_time1,offline_time2,online_time2,union_time,intersection_time,ai,bi,ai_prime,bi_prime,ci,di,score\n";
+    ofstream logs;
+    if(expe_type == "complete" or expe_type == "star"){
+        logs.open("logs/gmp-new-"+expe_type+"-"+dataset_name);
+        logs << "nodex,nodey,offline_time1,online_time1,offline_time2,online_time2,union_time,intersection_time,ai,bi,ai_prime,bi_prime,ci,di,score\n";
+
+    }
+    else if (expe_type == "single"){
+        string current_log_state;
+        ifstream input_logs("logs/gmp-new-"+expe_type+"-"+dataset_name);
+        logs.open("logs/gmp-new-"+expe_type+"-"+dataset_name, std::ios_base::app);
+
+        if(!getline(input_logs, current_log_state)){
+            logs << "nodex,nodey,offline_time1,online_time1,offline_time2,online_time2,union_time,intersection_time,ai,bi,ai_prime,bi_prime,ci,di,score\n";
+        }
+
+    }
 
 
     for (size_t i = 0; i < evaluated_edges.size(); i++)
@@ -76,6 +105,8 @@ void run_new_protocol_gmp(vector<UndirectedEdge> evaluated_edges, unordered_map<
         gettimeofday(&t_start, NULL);
 
 
+        // if we are treating new nodes, compute g^(alpha*x_i) and g^(beta*y_i)
+
         if(! nodex_already_treated)
             encrypted_neighbors_nodex_1 = get_encrypted_neighbors(&self_encryption_memory_1, nodex, graph1, with_memory, alpha, p, g);
         else encrypted_neighbors_nodex_1 = final_encryptions_1.at(nodex);
@@ -103,13 +134,15 @@ void run_new_protocol_gmp(vector<UndirectedEdge> evaluated_edges, unordered_map<
         gettimeofday(&t_start, NULL);
 
 
-        if(nodex_already_treated)
-        {
+
+        if(nodex_already_treated){
+            //no communication if node has been treated before
             size_of_ai = 0;
             size_of_ci = 0;
             size_of_ai_prime = 0;
         }
         else{
+            //compute ai' = ai^beta
             size_of_ai = size_of_vector_of_mpz(encrypted_neighbors_nodex_1);
             size_of_ci = size_of_vector_of_mpz(encrypted_neighbors_nodex_2);
 
@@ -128,12 +161,14 @@ void run_new_protocol_gmp(vector<UndirectedEdge> evaluated_edges, unordered_map<
 
         if(nodey_already_treated)
         {
+            //no communication if node has been treated before
             size_of_bi = 0;
             size_of_di = 0;
             size_of_bi_prime = 0;
         }
         else
         {
+            //compute bi' = bi^beta
             size_of_bi =  size_of_vector_of_mpz(encrypted_neighbors_nodey_1);
             size_of_di = size_of_vector_of_mpz(encrypted_neighbors_nodey_2);
 
@@ -157,6 +192,7 @@ void run_new_protocol_gmp(vector<UndirectedEdge> evaluated_edges, unordered_map<
 
         if(! nodex_already_treated)
         {
+            //compute c_i' = c_i^alpha
             for (size_t i = 0; i < encrypted_neighbors_nodex_2.size(); i++)
             {
 
@@ -172,6 +208,7 @@ void run_new_protocol_gmp(vector<UndirectedEdge> evaluated_edges, unordered_map<
 
         if(! nodey_already_treated)
         {
+            //compute d_i' = d_i^alpha
             for (size_t i = 0; i < encrypted_neighbors_nodey_2.size(); i++)
             {
                 mpz_powm(encrypted_neighbors_nodey_2.at(i).get_mpz_t(),
@@ -184,7 +221,7 @@ void run_new_protocol_gmp(vector<UndirectedEdge> evaluated_edges, unordered_map<
 
         }
 
-
+        //compute score according to desired metrci
         float score = compute_similarity_score(encrypted_neighbors_nodex_1, encrypted_neighbors_nodex_2,
                                                encrypted_neighbors_nodey_1, encrypted_neighbors_nodey_2,
                                                metric, &union_time, &intersection_time);
@@ -211,12 +248,12 @@ void run_new_protocol_gmp(vector<UndirectedEdge> evaluated_edges, unordered_map<
         cout << "Intersection time : " << std::setprecision(5)
              << intersection_time << " ms" << '\n';
 
-        cout << "Size of ai : "<< size_of_ai << endl;
-        cout << "Size of bi : "<< size_of_bi << endl;
-        cout << "Size of ai-prime : "<< size_of_ai_prime << endl;
-        cout << "Size of bi-prime : "<< size_of_bi_prime << endl;
-        cout << "Size of ci : "<< size_of_ci << endl;
-        cout << "Size of di : " << size_of_di << endl;
+        cout << "Size of ai : "<< size_of_ai << " B" << endl;
+        cout << "Size of bi : "<< size_of_bi <<" B" << endl;
+        cout << "Size of ai-prime : "<< size_of_ai_prime << " B" << endl;
+        cout << "Size of bi-prime : "<< size_of_bi_prime << " B" << endl;
+        cout << "Size of ci : "<< size_of_ci << " B" <<  endl;
+        cout << "Size of di : " << size_of_di << " B" << endl;
 
 #endif
 
@@ -236,6 +273,7 @@ void run_new_protocol_gmp(vector<UndirectedEdge> evaluated_edges, unordered_map<
              << score << "\n";
 
 
+        //store information of treated nodes
         treated_nodes.push_back(nodex);
         treated_nodes.push_back(nodey);
 
@@ -251,6 +289,20 @@ void run_new_protocol_gmp(vector<UndirectedEdge> evaluated_edges, unordered_map<
 
 }
 
+
+
+/**
+ * Compute similarity based on encrypted neighborhoods
+ *
+ * @param encrypted_neighbors_nodex_1 neighbors of node x in first graph
+ * @param encrypted_neighbors_nodex_2 neighbors of node x in second graph
+ * @param encrypted_neighbors_nodey_1 neighbors of node y in first graph
+ * @param encrypted_neighbors_nodey_2 neighbors of node y in second graph
+ * @param metric computed link prediction metric (common neighbors, jaccard or cosine)
+ * @param union_time time taken for the computation of the {a_1',...} U {c_1',...} and {b_1',...} U {d_1',...}
+ * @param intersection_time time taken for the computation of = |Γ(x) ∩ Γ(y)|
+ * @return the computed score
+ */
 float compute_similarity_score(vector<mpz_class> encrypted_neighbors_nodex_1,
                               vector<mpz_class>  encrypted_neighbors_nodex_2,
                               vector<mpz_class>  encrypted_neighbors_nodey_1,
@@ -263,6 +315,7 @@ float compute_similarity_score(vector<mpz_class> encrypted_neighbors_nodex_1,
     timeval t_start, t_end;
     gettimeofday(&t_start, NULL);
     int union_node1_size = encrypted_neighbors_nodex_1.size() + encrypted_neighbors_nodex_2.size();
+
 
     mpz_t encrypted_union_node1[union_node1_size];
 
@@ -288,6 +341,8 @@ float compute_similarity_score(vector<mpz_class> encrypted_neighbors_nodex_1,
     }
 
 
+
+    //compute {a_1',...} U {c_1',...}
     mpz_union(array_enc_neighbors_nodex_1, encrypted_neighbors_nodex_1.size(),
               array_enc_neighbors_nodex_2, encrypted_neighbors_nodex_2.size(),
               encrypted_union_node1, &union_node1_size);
@@ -319,6 +374,7 @@ float compute_similarity_score(vector<mpz_class> encrypted_neighbors_nodex_1,
     }
 
 
+    //compute {b_1',...} U {d_1',...}
     mpz_union(array_enc_neighbors_nodey_1, encrypted_neighbors_nodey_1.size(),
               array_enc_neighbors_nodey_2, encrypted_neighbors_nodey_2.size(),
               encrypted_union_node2, &union_node2_size);
@@ -332,6 +388,7 @@ float compute_similarity_score(vector<mpz_class> encrypted_neighbors_nodex_1,
     int intersection_size = union_node2_size;
     mpz_t encrypted_intersection[intersection_size];
 
+    //compute |Γ(x) ∩ Γ(y)|
     mpz_intersection(encrypted_union_node1, union_node1_size,
                      encrypted_union_node2, union_node2_size,
                      encrypted_intersection, &intersection_size);
@@ -339,6 +396,7 @@ float compute_similarity_score(vector<mpz_class> encrypted_neighbors_nodex_1,
     *intersection_time = *intersection_time + getMillies(t_start, t_end);
 
 
+    //compute the right metric
     if(metric == "neighbors") score = intersection_size;
     else if (metric == "cosine")
     {
@@ -371,6 +429,19 @@ float compute_similarity_score(vector<mpz_class> encrypted_neighbors_nodex_1,
 }
 
 
+
+/**
+ * Compute g^(alpha*x_i) and g^(beta*y_i)
+ *
+ * @param encryption_memory : cache for the encryptions of nodes that have alreeady been treated
+ * @param node : node that we want to encrypt or get its encrypted neighbors (x_i or y_i)
+ * @param graph : graph where we are getting the neighbors
+ * @param with_memory : wheter or not we are using the caching mechanism
+ * @param expo : exponent (alpha or beta)
+ * @param modulus : modulus for exponentiation
+ * @param g : generator
+ * @return : vector containing the encrypted neighbors of the node
+ */
 vector<mpz_class> get_encrypted_neighbors(unordered_map<uint32_t, mpz_class > *encryption_memory,
                                           uint32_t node, unordered_map<uint32_t, vector<uint32_t>> graph, bool with_memory,
                                           mpz_t expo, mpz_t modulus, mpz_t g)
@@ -421,6 +492,7 @@ vector<mpz_class> get_encrypted_neighbors(unordered_map<uint32_t, mpz_class > *e
     return encrypted_neighbors;
 
 }
+
 
 
 size_t size_of_vector_of_mpz(std::vector<mpz_class> vec)

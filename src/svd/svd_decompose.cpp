@@ -35,11 +35,6 @@ void compute_svd(string dataset_name, size_t dataset_size)
     logs.close();
 
 
-    // Print the results
-//    std::cout << "Singular values:\n" << singularValues << std::endl << std::endl;
-//    std::cout << "Left singular vectors:\n" << U << std::endl << std::endl;
-//    std::cout << "Right singular vectors:\n" << V << std::endl;
-
 
 
 }
