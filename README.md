@@ -20,6 +20,9 @@ The solution from [2] has been reimplemented based on the paper presenting the u
 - Update the ```experiments.sh``` file. An example is included for usage illustration. The available parameters for the experiments are :
  -  -d : the dataset name (polblogs,flickr or acm)
  -  -p the protocol (**local** for individual link prediction on separate graphs, **baseline** for the solution of [2], cryptograph, and svd)
+ -  -e exponentiation method (ecc, gmp)
+ -  -s security level
+ -  -t type of experiment (**single** for prediction between two random nodes, **star** for one random node and all others, **complete** for all possible links)
 
 ## References
 
