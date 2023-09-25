@@ -5,7 +5,7 @@ This repository contains the code of Crypto'Graph [1]. For comparison purposes, 
  - the SVD of the adjacency matrix (for comparison with [3])
 
 Crypto'Graph has been implemented based two methods for the encryptions : exponentiations using GMP, and elliptic curve-based exponentiations. 
-The solution from [2] has been reimplemented based on the paper presenting the used Private Set Intersection Cardinality (PSI-CA) method.
+The solution from [2] has been reimplemented based on the paper presenting the used Private Set Intersection Cardinality (PSI-CA) method [4].
 
 ## Requirements
 - GMP (for the GMP-variants of our protocol, and the protocol of [2]
@@ -17,7 +17,9 @@ The solution from [2] has been reimplemented based on the paper presenting the u
 ## Usage
 - Adapt the Makefile according to your OpenSSL and GMP **include** and **lib** paths
 - Compile the code : ```make all```
-- Update the ```experiments.sh``` file. 
+- Update the ```experiments.sh``` file. An example is included for usage illustration. The available parameters for the experiments are :
+ -  -d : the dataset name (polblogs,flickr or acm)
+ -  -p the protocol (**local** for individual link prediction on separate graphs, **baseline** for the solution of [2], cryptograph, and svd)
 
 ## References
 
