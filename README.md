@@ -30,6 +30,8 @@ Sofiane Azogagh, Zelma Aubin Birba, Sébastien Gambs and Marc-Olivier Killijian.
 . 2023 
 
 <a id="2" href="https://link.springer.com/chapter/10.1007/978-3-031-25734-6_3">[2]</a> 
-Didem Demirag1, Mina Namazi, Erman Ayday and Jeremy Clark. Privacy-Preserving Link Prediction. Data Privacy Management, Cryptocurrencies and Blockchain Technology. 2023.
+Didem Demirag, Mina Namazi, Erman Ayday and Jeremy Clark. Privacy-Preserving Link Prediction. Data Privacy Management, Cryptocurrencies and Blockchain Technology. 2023.
 
- 
+<a id="3" href="https://link.springer.com/chapter/10.1007/978-3-031-25734-6_3">[3]</a>
+Negin Entezari, Saba A. Al-Sayouri, Amirali Darvishzadeh and Evangelos E. Papalexakis. All You Need Is Low (Rank): Defending Against Adversarial Attacks on Graphs
+. Proceedings of the 13th International Conference on Web Search and Data Mining. 2020.
