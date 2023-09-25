@@ -35,7 +35,5 @@ void compute_svd(string dataset_name, size_t dataset_size)
     logs.close();
 
 
-
-
 }
 

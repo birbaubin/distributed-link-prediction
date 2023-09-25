@@ -48,19 +48,17 @@ void run_new_protocol_gmp(vector<UndirectedEdge> evaluated_edges, unordered_map<
 
     ofstream logs;
     if(expe_type == "complete" or expe_type == "star"){
-        logs.open("logs/gmp-new-"+expe_type+"-"+dataset_name);
+        logs.open("logs/gmp-cryptograph-"+expe_type+"-"+dataset_name);
         logs << "nodex,nodey,offline_time1,online_time1,offline_time2,online_time2,union_time,intersection_time,ai,bi,ai_prime,bi_prime,ci,di,score\n";
-
     }
     else if (expe_type == "single"){
         string current_log_state;
-        ifstream input_logs("logs/gmp-new-"+expe_type+"-"+dataset_name);
-        logs.open("logs/gmp-new-"+expe_type+"-"+dataset_name, std::ios_base::app);
+        ifstream input_logs("logs/gmp-cryptograph-"+expe_type+"-"+dataset_name);
+        logs.open("logs/gmp-cryptograph-"+expe_type+"-"+dataset_name, std::ios_base::app);
 
         if(!getline(input_logs, current_log_state)){
             logs << "nodex,nodey,offline_time1,online_time1,offline_time2,online_time2,union_time,intersection_time,ai,bi,ai_prime,bi_prime,ci,di,score\n";
         }
-
     }
 
 

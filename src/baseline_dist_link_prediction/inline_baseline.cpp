@@ -32,7 +32,6 @@ void run_baseline_protocol_inline(vector<UndirectedEdge> evaluated_edges, unorde
         if(!getline(input_logs, current_log_state)){
             logs << "nodex,nodey,offline_time1,online_time1,offline_time2,online_time2,ai,ai_prime,ts,score\n";
         }
-
     }
 
 

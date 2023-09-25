@@ -21,10 +21,6 @@ all: helpers crypto local_protocol baseline_protocol new_protocol new_protocol_o
 inline: 
 	g++ -c src/main.cpp ${OPENSSL_INCLUDE} ${STDFLAG} ${GMP_INCLUDE}
 
-multiprocess:
-	g++ -c src/multiparty_main.cpp ${OPENSSL_FLAGS} ${BOOST_FLAGS} ${STDFLAG}
-
-
 new_protocol:
 	g++ -c ${NEW_PROTOCOL_GMP_SRC} ${STDFLAG} ${OPENSSL_INCLUDE}  ${GMP_INCLUDE}
 
@@ -46,7 +42,6 @@ tests:
 
 crypto:
 	g++ -c ${CRYPTO_SRC} ${STDFLAG} -I/opt/homebrew/Cellar/openssl@3/3.0.8/include
-
 
 clean:
 	rm *.o output

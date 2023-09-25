@@ -11,7 +11,7 @@ int main(int argc, char** argv)
     int secparam=0;
 
     parsing_ctx options[] = {
-			{(void*) &protocol_type, T_STR, 'p', "Protocol type(local, baseline, new, svd)", true, false},
+			{(void*) &protocol_type, T_STR, 'p', "Protocol type(local, baseline, cryptograph, svd)", true, false},
 			{(void*) &expo_type, T_STR, 'e', "Cryptographic expo(gmp, ecc)", true, false},
 			{(void*) &secparam, T_NUM, 's', "Symmetric security bits)", true, false},
             {(void*) &dataset, T_STR, 'd', "Dataset (polblogs, acm, flickr)", true, false},

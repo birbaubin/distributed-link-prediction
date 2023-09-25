@@ -78,11 +78,7 @@ void run_clear_protocol(vector<UndirectedEdge> evaluated_edges,  unordered_map<u
 
 
     }
-//
-//    #ifdef DEBUG_TIME
-//    cout << "Time for all cleartext predictions : " << std::setprecision(5)
-//                         << getMillies(t_protocol_start, t_end) << " ms" << '\n';
-//    #endif
+
 
 }
 
@@ -116,8 +112,6 @@ void run_local_protocol(vector<UndirectedEdge> evaluated_edges,  unordered_map<u
 
     for (size_t i = 0; i < evaluated_edges.size(); i++)
     {
-
-
         gettimeofday(&t_start, NULL);
         uint32_t nodex = evaluated_edges.at(i).vertices[0];
         uint32_t nodey = evaluated_edges.at(i).vertices[1];
