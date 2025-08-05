@@ -27,7 +27,7 @@ The solution from [2] has been reimplemented based on the paper presenting the u
 ## References
 <a id="1" href="https://arxiv.org/abs/2309.10890">[1]</a> 
 Sofiane Azogagh, Zelma Aubin Birba, Sébastien Gambs and Marc-Olivier Killijian. Crypto'Graph: Leveraging Privacy-Preserving Distributed Link Prediction for Robust Graph Learning
-. 2023 
+. CODASPY'24 
 
 <a id="2" href="https://link.springer.com/chapter/10.1007/978-3-031-25734-6_3">[2]</a> 
 Didem Demirag, Mina Namazi, Erman Ayday and Jeremy Clark. Privacy-Preserving Link Prediction. Data Privacy Management, Cryptocurrencies and Blockchain Technology. 2023.
